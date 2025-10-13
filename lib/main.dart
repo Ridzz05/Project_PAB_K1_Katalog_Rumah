@@ -1,4 +1,11 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'constants/app_constants.dart';
+import 'services/connectivity_service.dart';
+import 'widgets/cloud_widget.dart';
+import 'widgets/connection_toggle.dart';
+import 'widgets/connection_status_text.dart';
 
 void main() {
   runApp(const MyApp());
@@ -6,125 +13,114 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Menampilkan Button Off/On ',
+      title: AppConstants.appName,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue.shade800),
+        colorScheme: ColorScheme.fromSeed(seedColor: AppConstants.primaryBlue),
       ),
-      home: const GambarAwan(title: 'Check Internet Connection'),
+      home: const InternetConnectionScreen(title: AppConstants.appTitle),
     );
   }
 }
-class GambarAwan extends StatefulWidget {
-  const GambarAwan({super.key, required this.title});
+
+/// Screen utama untuk menampilkan status koneksi internet
+class InternetConnectionScreen extends StatefulWidget {
+  const InternetConnectionScreen({super.key, required this.title});
   final String title;
 
   @override
-  State<GambarAwan> createState() => GambarAwanState();
+  State<InternetConnectionScreen> createState() => _InternetConnectionScreenState();
 }
 
-class GambarAwanState extends State<GambarAwan> {
+class _InternetConnectionScreenState extends State<InternetConnectionScreen> {
   bool _isConnected = true;
+  bool _isCloudReady = false;
+  late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
+  final ConnectivityService _connectivityService = ConnectivityService();
 
+  /// Toggle koneksi secara manual (untuk testing)
   void _toggleConnection() {
     setState(() {
       _isConnected = !_isConnected;
     });
   }
 
+  /// Memeriksa status koneksi saat ini
+  void _checkConnectivity() async {
+    final connectivityResults = await _connectivityService.checkConnectivity();
+    _updateConnectionStatus(connectivityResults);
+  }
+
+  /// Update status koneksi berdasarkan hasil connectivity
+  void _updateConnectionStatus(List<ConnectivityResult> connectivityResults) {
+    final bool isConnected = ConnectivityService.isConnected(connectivityResults);
+
+    if (mounted) {
+      setState(() {
+        _isConnected = isConnected;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _checkConnectivity();
+    _connectivitySubscription = _connectivityService.connectivityStream.listen(
+      _updateConnectionStatus,
+    );
+  }
+
+  @override
+  void dispose() {
+    _connectivityService.stopListening();
+    _connectivitySubscription.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (mounted) {
+      setState(() {
+        _isCloudReady = true;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final Color statusColor = _isConnected ? Colors.green : Colors.red;
-    final IconData statusIcon = _isConnected ? Icons.check : Icons.close;
-    final String statusText = _isConnected ? 'Terhubung' : 'Tidak Terhubung';
-
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        backgroundColor: Colors.blue.shade800,
+        backgroundColor: AppConstants.primaryBlue,
       ),
       body: Center(
-        child: GestureDetector(
-          onTap: _toggleConnection,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Icon(
-                    Icons.cloud,
-                    size: 120,
-                    color: Colors.grey.shade400,
-                  ),
-                  SizedBox(
-                    width: 140,
-                    height: 70,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(50),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 12,
-                            offset: Offset(0, 6),
-                          ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: AnimatedAlign(
-                          alignment: _isConnected ? Alignment.centerRight : Alignment.centerLeft,
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.easeOut,
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 250),
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: statusColor,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: statusColor.withOpacity(0.4),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 6),
-                                ),
-                              ],
-                            ),
-                            child: Icon(
-                              statusIcon,
-                              color: Colors.white,
-                              size: 28,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                transitionBuilder: (child, animation) => FadeTransition(
-                  opacity: animation,
-                  child: child,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                CloudWidget(
+                  isReady: _isCloudReady,
+                  assetPath: 'assets/cloud/cloud.svg',
                 ),
-                child: Text(
-                  statusText,
-                  key: ValueKey<bool>(_isConnected),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: statusColor,
-                        fontWeight: FontWeight.w600,
-                      ),
+                Positioned(
+                  bottom: AppConstants.bottomOffset,
+                  child: ConnectionToggle(
+                    isConnected: _isConnected,
+                    onTap: _toggleConnection,
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+            const SizedBox(height: AppConstants.verticalSpacing),
+            ConnectionStatusText(isConnected: _isConnected),
+          ],
         ),
       ),
     );

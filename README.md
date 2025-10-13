@@ -69,4 +69,5 @@ Proyek ini bertujuan untuk:
 
 © 2025 — Disusun oleh<br>
 **M. Rizki Algipari**<br>
-**Yonathan Rinfi**
+**Yonathan Rinfi**<br>
+**Daniel Linpa Ganata**

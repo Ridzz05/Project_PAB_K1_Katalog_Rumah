@@ -71,3 +71,4 @@ Proyek ini bertujuan untuk:
 **M. Rizki Algipari**<br>
 **Yonathan Rinfi**<br>
 **Daniel Linpa Ganata**
+# PAB_Wisata_Candi

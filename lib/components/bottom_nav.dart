@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-
 const Color inActiveIconColor = Color.fromARGB(255, 138, 142, 138);
 
 class BottomNavScreen extends StatelessWidget {
@@ -64,84 +63,84 @@ class BottomNavScreen extends StatelessWidget {
                 indicatorColor: const Color(0x1AFF7643),
                 animationDuration: const Duration(milliseconds: 350),
                 labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-              destinations: [
-                NavigationDestination(
-                  icon: SvgPicture.string(
-                    homeIcon,
-                    colorFilter: const ColorFilter.mode(
-                      inActiveIconColor,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                  selectedIcon: _AnimatedActiveIcon(
-                    child: SvgPicture.string(
+                destinations: [
+                  NavigationDestination(
+                    icon: SvgPicture.string(
                       homeIcon,
                       colorFilter: const ColorFilter.mode(
-                        Color(0xFFFF7643),
+                        inActiveIconColor,
                         BlendMode.srcIn,
                       ),
                     ),
-                  ),
-                  label: 'Home',
-                ),
-                NavigationDestination(
-                  icon: SvgPicture.string(
-                    searchIcon,
-                    colorFilter: const ColorFilter.mode(
-                      inActiveIconColor,
-                      BlendMode.srcIn,
+                    selectedIcon: _AnimatedActiveIcon(
+                      child: SvgPicture.string(
+                        homeIcon,
+                        colorFilter: const ColorFilter.mode(
+                          Color(0xFFFF7643),
+                          BlendMode.srcIn,
+                        ),
+                      ),
                     ),
+                    label: 'Beranda',
                   ),
-                  selectedIcon: _AnimatedActiveIcon(
-                    child: SvgPicture.string(
+                  NavigationDestination(
+                    icon: SvgPicture.string(
                       searchIcon,
                       colorFilter: const ColorFilter.mode(
-                        Color(0xFFFF7643),
+                        inActiveIconColor,
                         BlendMode.srcIn,
                       ),
                     ),
-                  ),
-                  label: 'Search',
-                ),
-                NavigationDestination(
-                  icon: SvgPicture.string(
-                    favoriteIcon,
-                    colorFilter: const ColorFilter.mode(
-                      inActiveIconColor,
-                      BlendMode.srcIn,
+                    selectedIcon: _AnimatedActiveIcon(
+                      child: SvgPicture.string(
+                        searchIcon,
+                        colorFilter: const ColorFilter.mode(
+                          Color(0xFFFF7643),
+                          BlendMode.srcIn,
+                        ),
+                      ),
                     ),
+                    label: 'Cari',
                   ),
-                  selectedIcon: _AnimatedActiveIcon(
-                    child: SvgPicture.string(
+                  NavigationDestination(
+                    icon: SvgPicture.string(
                       favoriteIcon,
                       colorFilter: const ColorFilter.mode(
-                        Color(0xFFFF7643),
+                        inActiveIconColor,
                         BlendMode.srcIn,
                       ),
                     ),
-                  ),
-                  label: 'Favorite',
-                ),
-                NavigationDestination(
-                  icon: SvgPicture.string(
-                    userIcon,
-                    colorFilter: const ColorFilter.mode(
-                      inActiveIconColor,
-                      BlendMode.srcIn,
+                    selectedIcon: _AnimatedActiveIcon(
+                      child: SvgPicture.string(
+                        favoriteIcon,
+                        colorFilter: const ColorFilter.mode(
+                          Color(0xFFFF7643),
+                          BlendMode.srcIn,
+                        ),
+                      ),
                     ),
+                    label: 'Favorit',
                   ),
-                  selectedIcon: _AnimatedActiveIcon(
-                    child: SvgPicture.string(
+                  NavigationDestination(
+                    icon: SvgPicture.string(
                       userIcon,
                       colorFilter: const ColorFilter.mode(
-                        Color(0xFFFF7643),
+                        inActiveIconColor,
                         BlendMode.srcIn,
                       ),
                     ),
+                    selectedIcon: _AnimatedActiveIcon(
+                      child: SvgPicture.string(
+                        userIcon,
+                        colorFilter: const ColorFilter.mode(
+                          Color(0xFFFF7643),
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                    ),
+                    label: 'Profil',
                   ),
-                  label: 'Profile',
-                ),
-              ],
+                ],
               ),
             ),
           ),

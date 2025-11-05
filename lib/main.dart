@@ -67,10 +67,7 @@ class AuthGate extends StatelessWidget {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 250),
       child: auth.isAuthenticated
-          ? AppShell(
-              key: const ValueKey('app-shell'),
-              onLogout: auth.logout,
-            )
+          ? AppShell(key: const ValueKey('app-shell'), onLogout: auth.logout)
           : SignInScreen(
               key: const ValueKey('sign-in'),
               onSubmit: auth.login,
@@ -90,18 +87,14 @@ class AuthScope extends InheritedNotifier<AuthController> {
   }) : super(notifier: controller);
 
   static AuthController of(BuildContext context) {
-    final scope =
-        context.dependOnInheritedWidgetOfExactType<AuthScope>();
+    final scope = context.dependOnInheritedWidgetOfExactType<AuthScope>();
     assert(scope != null, 'AuthScope.of() called with no AuthScope in context');
     return scope!.notifier!;
   }
 }
 
 class AppShell extends StatefulWidget {
-  const AppShell({
-    super.key,
-    required this.onLogout,
-  });
+  const AppShell({super.key, required this.onLogout});
 
   final VoidCallback onLogout;
 
@@ -111,10 +104,10 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   static const List<String> _titles = [
-    'Home',
-    'Search',
-    'Favorites',
-    'Profile',
+    'Beranda',
+    'Cari Rumah',
+    'Favorit',
+    'Profil',
   ];
 
   final Set<int> _favoriteIds = <int>{};
@@ -192,9 +185,7 @@ class _AppShellState extends State<AppShell> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text(_titles[_currentIndex]),
-      ),
+      appBar: AppBar(title: Text(_titles[_currentIndex])),
       body: IndexedStack(index: _currentIndex, children: tabs),
       bottomNavigationBar: BottomNavScreen(
         currentIndex: _currentIndex,
@@ -226,8 +217,9 @@ class HomeTab extends StatelessWidget {
         itemBuilder: (context, index) {
           if (index == 0) {
             return const _SectionHeader(
-              title: 'Daftar Universitas',
-              subtitle: 'Referensi kampus pilihan dengan tampilan sederhana.',
+              title: 'Daftar Rumah',
+              subtitle:
+                  'Lihat ringkasan hunian pilihan sebelum membuka detailnya.',
             );
           }
 
@@ -237,6 +229,8 @@ class HomeTab extends StatelessWidget {
             university: university,
             isFavorite: isFavorite,
             onToggleFavorite: () => onToggleFavorite(university),
+            showFavoriteButton: false,
+            showPreviewDetails: false,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => UniversityDetailScreen(
@@ -276,12 +270,12 @@ class SearchTab extends StatelessWidget {
     final results = lowerQuery.isEmpty
         ? universities
         : universities
-            .where(
-              (uni) =>
-                  uni.name.toLowerCase().contains(lowerQuery) ||
-                  uni.location.toLowerCase().contains(lowerQuery),
-            )
-            .toList();
+              .where(
+                (uni) =>
+                    uni.name.toLowerCase().contains(lowerQuery) ||
+                    uni.location.toLowerCase().contains(lowerQuery),
+              )
+              .toList();
 
     return SafeArea(
       child: Column(
@@ -304,14 +298,18 @@ class SearchTab extends StatelessWidget {
                     ),
                   ),
                 ),
-                prefixIconConstraints:
-                    const BoxConstraints(minWidth: 0, minHeight: 0),
-                hintText: 'Cari universitas...',
+                prefixIconConstraints: const BoxConstraints(
+                  minWidth: 0,
+                  minHeight: 0,
+                ),
+                hintText: 'Cari rumah...',
                 hintStyle: const TextStyle(color: Color(0xFF9F9F9F)),
                 filled: true,
                 fillColor: const Color(0xFFF7F7F7),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                   borderSide: BorderSide.none,
@@ -335,7 +333,7 @@ class SearchTab extends StatelessWidget {
                 ? const _EmptyState(
                     title: 'Tidak ada hasil',
                     subtitle:
-                        'Coba gunakan kata kunci lain untuk menemukan kampus.',
+                        'Coba gunakan kata kunci lain untuk menemukan hunian.',
                   )
                 : ListView.separated(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
@@ -348,12 +346,15 @@ class SearchTab extends StatelessWidget {
                         university: university,
                         isFavorite: isFavorite,
                         onToggleFavorite: () => onToggleFavorite(university),
+                        showFavoriteButton: false,
+                        showPreviewDetails: false,
                         onTap: () => Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => UniversityDetailScreen(
                               university: university,
                               isFavorite: isFavorite,
-                              onToggleFavorite: () => onToggleFavorite(university),
+                              onToggleFavorite: () =>
+                                  onToggleFavorite(university),
                             ),
                           ),
                         ),
@@ -383,7 +384,7 @@ class FavoritesTab extends StatelessWidget {
       return const SafeArea(
         child: _EmptyState(
           title: 'Belum ada favorit',
-          subtitle: 'Tambahkan universitas dari tab Home atau Search.',
+          subtitle: 'Tambahkan hunian dari tab Beranda atau Cari.',
         ),
       );
     }
@@ -396,8 +397,8 @@ class FavoritesTab extends StatelessWidget {
         itemBuilder: (context, index) {
           if (index == 0) {
             return const _SectionHeader(
-              title: 'Universitas Favorit',
-              subtitle: 'Simpan daftar kampus yang ingin kamu pantau.',
+              title: 'Rumah Favorit',
+              subtitle: 'Simpan daftar hunian yang ingin kamu pantau.',
             );
           }
 
@@ -406,6 +407,7 @@ class FavoritesTab extends StatelessWidget {
             university: university,
             isFavorite: true,
             onToggleFavorite: () => onToggleFavorite(university),
+            showPreviewDetails: false,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => UniversityDetailScreen(
@@ -423,10 +425,7 @@ class FavoritesTab extends StatelessWidget {
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({
-    required this.title,
-    this.subtitle,
-  });
+  const _SectionHeader({required this.title, this.subtitle});
 
   final String title;
   final String? subtitle;
@@ -459,10 +458,7 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState({
-    required this.title,
-    required this.subtitle,
-  });
+  const _EmptyState({required this.title, required this.subtitle});
 
   final String title;
   final String subtitle;
@@ -512,12 +508,16 @@ class UniversityTile extends StatelessWidget {
     required this.isFavorite,
     required this.onToggleFavorite,
     this.onTap,
+    this.showFavoriteButton = true,
+    this.showPreviewDetails = true,
   });
 
   final University university;
   final bool isFavorite;
   final VoidCallback onToggleFavorite;
   final VoidCallback? onTap;
+  final bool showFavoriteButton;
+  final bool showPreviewDetails;
 
   @override
   Widget build(BuildContext context) {
@@ -562,23 +562,32 @@ class UniversityTile extends StatelessWidget {
                   children: [
                     Text(
                       university.name,
-                      style: theme.textTheme.titleMedium?.copyWith(
+                      style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF1F1F1F),
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      university.location,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: const Color(0xFF7A7A7A),
+                    if (showPreviewDetails)
+                      Text(
+                        university.location,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: const Color(0xFF7A7A7A),
+                        ),
+                      )
+                    else
+                      Text(
+                        'lihat detail lengkap',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: const Color(0xFF7A7A7A),
+                        ),
                       ),
-                    ),
-                    if (university.speciality.isNotEmpty) ...[
+                    if (showPreviewDetails &&
+                        university.speciality.isNotEmpty) ...[
                       const SizedBox(height: 4),
                       Text(
                         university.speciality,
-                        style: theme.textTheme.bodySmall?.copyWith(
+                        style: theme.textTheme.labelSmall?.copyWith(
                           color: const Color(0xFFFF7643),
                           fontWeight: FontWeight.w500,
                         ),
@@ -588,26 +597,25 @@ class UniversityTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              IconButton(
-                onPressed: onToggleFavorite,
-                iconSize: 22,
-                splashRadius: 20,
-                icon: Icon(
-                  isFavorite ? Icons.favorite : Icons.favorite_border,
-                  color: isFavorite
-                      ? const Color(0xFFFF7643)
-                      : const Color(0xFFB6B6B6),
+              if (showFavoriteButton) ...[
+                IconButton(
+                  onPressed: onToggleFavorite,
+                  iconSize: 22,
+                  splashRadius: 20,
+                  icon: Icon(
+                    isFavorite ? Icons.favorite : Icons.favorite_border,
+                    color: isFavorite
+                        ? const Color(0xFFFF7643)
+                        : const Color(0xFFB6B6B6),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 4),
+                const SizedBox(width: 4),
+              ],
               IconButton(
                 onPressed: onTap,
                 iconSize: 22,
                 splashRadius: 20,
-                icon: const Icon(
-                  Icons.chevron_right,
-                  color: Color(0xFFB6B6B6),
-                ),
+                icon: const Icon(Icons.chevron_right, color: Color(0xFFB6B6B6)),
               ),
             ],
           ),
@@ -753,7 +761,7 @@ class UniversityDetailScreen extends StatelessWidget {
                   Text(
                     university.description.isNotEmpty
                         ? university.description
-                        : 'Tidak ada deskripsi tersedia untuk universitas ini.',
+                        : 'Tidak ada deskripsi tersedia untuk hunian ini.',
                     style: const TextStyle(
                       fontSize: 15,
                       color: Color(0xFF4A4A4A),
@@ -762,7 +770,7 @@ class UniversityDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 32),
                   const Text(
-                    'Universitas Lainnya',
+                    'Rumah Lainnya',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
@@ -770,25 +778,29 @@ class UniversityDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  ...otherUniversities.map((otherUni) => Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: UniversityTile(
-                          university: otherUni,
-                          isFavorite: false,
-                          onToggleFavorite: () {},
-                          onTap: () {
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                builder: (_) => UniversityDetailScreen(
-                                  university: otherUni,
-                                  isFavorite: false,
-                                  onToggleFavorite: () {},
-                                ),
+                  ...otherUniversities.map(
+                    (otherUni) => Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: UniversityTile(
+                        university: otherUni,
+                        isFavorite: false,
+                        onToggleFavorite: () {},
+                        showFavoriteButton: false,
+                        showPreviewDetails: false,
+                        onTap: () {
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (_) => UniversityDetailScreen(
+                                university: otherUni,
+                                isFavorite: false,
+                                onToggleFavorite: () {},
                               ),
-                            );
-                          },
-                        ),
-                      )),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 24),
                 ],
               ),

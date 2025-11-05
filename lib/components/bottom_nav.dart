@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+
 const Color inActiveIconColor = Color.fromARGB(255, 138, 142, 138);
 
 class BottomNavScreen extends StatelessWidget {
@@ -15,82 +16,162 @@ class BottomNavScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      onTap: onTap,
-      currentIndex: currentIndex,
-      showSelectedLabels: false,
-      showUnselectedLabels: false,
-      type: BottomNavigationBarType.fixed,
-      items: [
-        BottomNavigationBarItem(
-          icon: SvgPicture.string(
-            homeIcon,
-            colorFilter: const ColorFilter.mode(
-              inActiveIconColor,
-              BlendMode.srcIn,
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x1A000000),
+                blurRadius: 12,
+                offset: Offset(0, 6),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                navigationBarTheme: NavigationBarThemeData(
+                  labelTextStyle: MaterialStateProperty.resolveWith<TextStyle?>(
+                    (Set<MaterialState> states) {
+                      if (states.contains(MaterialState.selected)) {
+                        return const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFFFF7643),
+                        );
+                      }
+                      return const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w400,
+                        color: inActiveIconColor,
+                      );
+                    },
+                  ),
+                ),
+              ),
+              child: NavigationBar(
+                selectedIndex: currentIndex,
+                onDestinationSelected: onTap,
+                height: 72,
+                elevation: 0,
+                backgroundColor: Colors.white,
+                indicatorColor: const Color(0x1AFF7643),
+                animationDuration: const Duration(milliseconds: 350),
+                labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+              destinations: [
+                NavigationDestination(
+                  icon: SvgPicture.string(
+                    homeIcon,
+                    colorFilter: const ColorFilter.mode(
+                      inActiveIconColor,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  selectedIcon: _AnimatedActiveIcon(
+                    child: SvgPicture.string(
+                      homeIcon,
+                      colorFilter: const ColorFilter.mode(
+                        Color(0xFFFF7643),
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ),
+                  label: 'Home',
+                ),
+                NavigationDestination(
+                  icon: SvgPicture.string(
+                    searchIcon,
+                    colorFilter: const ColorFilter.mode(
+                      inActiveIconColor,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  selectedIcon: _AnimatedActiveIcon(
+                    child: SvgPicture.string(
+                      searchIcon,
+                      colorFilter: const ColorFilter.mode(
+                        Color(0xFFFF7643),
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ),
+                  label: 'Search',
+                ),
+                NavigationDestination(
+                  icon: SvgPicture.string(
+                    favoriteIcon,
+                    colorFilter: const ColorFilter.mode(
+                      inActiveIconColor,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  selectedIcon: _AnimatedActiveIcon(
+                    child: SvgPicture.string(
+                      favoriteIcon,
+                      colorFilter: const ColorFilter.mode(
+                        Color(0xFFFF7643),
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ),
+                  label: 'Favorite',
+                ),
+                NavigationDestination(
+                  icon: SvgPicture.string(
+                    userIcon,
+                    colorFilter: const ColorFilter.mode(
+                      inActiveIconColor,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  selectedIcon: _AnimatedActiveIcon(
+                    child: SvgPicture.string(
+                      userIcon,
+                      colorFilter: const ColorFilter.mode(
+                        Color(0xFFFF7643),
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ),
+                  label: 'Profile',
+                ),
+              ],
+              ),
             ),
           ),
-          activeIcon: SvgPicture.string(
-            homeIcon,
-            colorFilter: const ColorFilter.mode(
-              Color(0xFFFF7643),
-              BlendMode.srcIn,
-            ),
-          ),
-          label: "Home",
         ),
-        BottomNavigationBarItem(
-          icon: SvgPicture.string(
-            searchIcon,
-            colorFilter: const ColorFilter.mode(
-              inActiveIconColor,
-              BlendMode.srcIn,
-            ),
-          ),
-          activeIcon: SvgPicture.string(
-            searchIcon,
-            colorFilter: const ColorFilter.mode(
-              Color(0xFFFF7643),
-              BlendMode.srcIn,
-            ),
-          ),
-          label: "Search",
+      ),
+    );
+  }
+}
+
+class _AnimatedActiveIcon extends StatelessWidget {
+  const _AnimatedActiveIcon({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedScale(
+      scale: 1,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOutBack,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 250),
+        switchInCurve: Curves.easeOutCubic,
+        switchOutCurve: Curves.easeInCubic,
+        transitionBuilder: (child, animation) => ScaleTransition(
+          scale: Tween<double>(begin: 0.9, end: 1).animate(animation),
+          child: FadeTransition(opacity: animation, child: child),
         ),
-        BottomNavigationBarItem(
-          icon: SvgPicture.string(
-            favoriteIcon,
-            colorFilter: const ColorFilter.mode(
-              inActiveIconColor,
-              BlendMode.srcIn,
-            ),
-          ),
-          activeIcon: SvgPicture.string(
-            favoriteIcon,
-            colorFilter: const ColorFilter.mode(
-              Color(0xFFFF7643),
-              BlendMode.srcIn,
-            ),
-          ),
-          label: "Favorite",
-        ),
-        BottomNavigationBarItem(
-          icon: SvgPicture.string(
-            userIcon,
-            colorFilter: const ColorFilter.mode(
-              inActiveIconColor,
-              BlendMode.srcIn,
-            ),
-          ),
-          activeIcon: SvgPicture.string(
-            userIcon,
-            colorFilter: const ColorFilter.mode(
-              Color(0xFFFF7643),
-              BlendMode.srcIn,
-            ),
-          ),
-          label: "Profile",
-        ),
-      ],
+        child: child,
+      ),
     );
   }
 }

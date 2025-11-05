@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'auth/auth.dart';
 import 'components/bottom_nav.dart';
+import 'data/data_universitas.dart';
 import 'screens/profile_screens.dart';
 
 void main() {
@@ -185,6 +186,7 @@ class _AppShellState extends State<AppShell> {
         userName: auth.userName,
         userEmail: auth.userEmail,
         userPassword: auth.userPassword,
+        favoriteCount: _favoriteIds.length,
       ),
     ];
 
@@ -235,6 +237,15 @@ class HomeTab extends StatelessWidget {
             university: university,
             isFavorite: isFavorite,
             onToggleFavorite: () => onToggleFavorite(university),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => UniversityDetailScreen(
+                  university: university,
+                  isFavorite: isFavorite,
+                  onToggleFavorite: () => onToggleFavorite(university),
+                ),
+              ),
+            ),
           );
         },
       ),
@@ -337,6 +348,15 @@ class SearchTab extends StatelessWidget {
                         university: university,
                         isFavorite: isFavorite,
                         onToggleFavorite: () => onToggleFavorite(university),
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => UniversityDetailScreen(
+                              university: university,
+                              isFavorite: isFavorite,
+                              onToggleFavorite: () => onToggleFavorite(university),
+                            ),
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -386,6 +406,15 @@ class FavoritesTab extends StatelessWidget {
             university: university,
             isFavorite: true,
             onToggleFavorite: () => onToggleFavorite(university),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => UniversityDetailScreen(
+                  university: university,
+                  isFavorite: true,
+                  onToggleFavorite: () => onToggleFavorite(university),
+                ),
+              ),
+            ),
           );
         },
       ),
@@ -482,11 +511,13 @@ class UniversityTile extends StatelessWidget {
     required this.university,
     required this.isFavorite,
     required this.onToggleFavorite,
+    this.onTap,
   });
 
   final University university;
   final bool isFavorite;
   final VoidCallback onToggleFavorite;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -499,7 +530,7 @@ class UniversityTile extends StatelessWidget {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        onTap: () {},
+        onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
@@ -568,6 +599,16 @@ class UniversityTile extends StatelessWidget {
                       : const Color(0xFFB6B6B6),
                 ),
               ),
+              const SizedBox(width: 4),
+              IconButton(
+                onPressed: onTap,
+                iconSize: 22,
+                splashRadius: 20,
+                icon: const Icon(
+                  Icons.chevron_right,
+                  color: Color(0xFFB6B6B6),
+                ),
+              ),
             ],
           ),
         ),
@@ -576,76 +617,188 @@ class UniversityTile extends StatelessWidget {
   }
 }
 
-class University {
-  final int id;
-  final String name;
-  final String location;
-  final String imageUrl;
-  final String speciality;
-  final bool isFavorite;
-
-  const University({
-    required this.id,
-    required this.name,
-    required this.location,
-    required this.imageUrl,
-    this.speciality = '',
-    this.isFavorite = false,
+class UniversityDetailScreen extends StatelessWidget {
+  const UniversityDetailScreen({
+    super.key,
+    required this.university,
+    required this.isFavorite,
+    required this.onToggleFavorite,
   });
-}
 
-const List<University> demoUniversities = [
-  University(
-    id: 1,
-    name: 'Universitas Indonesia',
-    location: 'Depok, Jawa Barat',
-    speciality: 'Kedokteran & Ilmu Sosial terbaik',
-    imageUrl:
-        'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=720&q=80',
-    isFavorite: true,
-  ),
-  University(
-    id: 2,
-    name: 'Institut Teknologi Bandung',
-    location: 'Bandung, Jawa Barat',
-    speciality: 'Teknik & Sains teratas',
-    imageUrl:
-        'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=720&q=80',
-  ),
-  University(
-    id: 3,
-    name: 'Universitas Gadjah Mada',
-    location: 'Yogyakarta, DIY',
-    speciality: 'Riset multidisiplin unggulan',
-    imageUrl:
-        'https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=720&q=80',
-    isFavorite: true,
-  ),
-  University(
-    id: 4,
-    name: 'Institut Pertanian Bogor',
-    location: 'Bogor, Jawa Barat',
-    speciality: 'Agrokompleks dan lingkungan',
-    imageUrl:
-        'https://images.unsplash.com/photo-1533228100845-08145b01de14?auto=format&fit=crop&w=720&q=80',
-  ),
-  University(
-    id: 5,
-    name: 'Universitas Airlangga',
-    location: 'Surabaya, Jawa Timur',
-    speciality: 'Kesehatan & bisnis kompetitif',
-    imageUrl:
-        'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=720&q=80',
-  ),
-  University(
-    id: 6,
-    name: 'Binus University',
-    location: 'Jakarta, DKI Jakarta',
-    speciality: 'Teknologi & bisnis modern',
-    imageUrl:
-        'https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=720&q=80',
-  ),
-];
+  final University university;
+  final bool isFavorite;
+  final VoidCallback onToggleFavorite;
+
+  @override
+  Widget build(BuildContext context) {
+    final otherUniversities = demoUniversities
+        .where((uni) => uni.id != university.id)
+        .take(3)
+        .toList();
+
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 280,
+            pinned: true,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            flexibleSpace: FlexibleSpaceBar(
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.network(
+                    university.imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      color: const Color(0xFFF0F0F0),
+                      child: const Icon(
+                        Icons.school_outlined,
+                        size: 100,
+                        color: Color(0xFFB6B6B6),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.3),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              IconButton(
+                icon: Icon(
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: Colors.white,
+                ),
+                onPressed: onToggleFavorite,
+              ),
+            ],
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    university.name,
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1F1F1F),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.location_on,
+                        size: 18,
+                        color: Color(0xFF7A7A7A),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        university.location,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Color(0xFF7A7A7A),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (university.speciality.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0x1AFF7643),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        university.speciality,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFFFF7643),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Deskripsi',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1F1F1F),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    university.description.isNotEmpty
+                        ? university.description
+                        : 'Tidak ada deskripsi tersedia untuk universitas ini.',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: Color(0xFF4A4A4A),
+                      height: 1.6,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  const Text(
+                    'Universitas Lainnya',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1F1F1F),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ...otherUniversities.map((otherUni) => Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: UniversityTile(
+                          university: otherUni,
+                          isFavorite: false,
+                          onToggleFavorite: () {},
+                          onTap: () {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (_) => UniversityDetailScreen(
+                                  university: otherUni,
+                                  isFavorite: false,
+                                  onToggleFavorite: () {},
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      )),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 const String searchIcon =
     '''<svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg">

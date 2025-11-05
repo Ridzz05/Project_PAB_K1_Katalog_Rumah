@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({
@@ -10,12 +11,14 @@ class ProfileScreen extends StatelessWidget {
     this.userName,
     this.userEmail,
     this.userPassword,
+    this.favoriteCount = 0,
   });
 
   final VoidCallback onLogout;
   final String? userName;
   final String? userEmail;
   final String? userPassword;
+  final int favoriteCount;
 
   @override
   Widget build(BuildContext context) {
@@ -30,28 +33,9 @@ class ProfileScreen extends StatelessWidget {
               name: userName,
               email: userEmail,
               password: userPassword,
+              favoriteCount: favoriteCount,
             ),
             const SizedBox(height: 20),
-            ProfileMenu(
-              text: "My Account",
-              iconSvg: accountIconSvg,
-              press: () {},
-            ),
-            ProfileMenu(
-              text: "Notifications",
-              iconSvg: bellIconSvg,
-              press: () {},
-            ),
-            ProfileMenu(
-              text: "Settings",
-              iconSvg: settingsIconSvg,
-              press: () {},
-            ),
-            ProfileMenu(
-              text: "Help Center",
-              iconSvg: helpIconSvg,
-              press: () {},
-            ),
             ProfileMenu(
               text: "Log Out",
               iconSvg: logoutIconSvg,
@@ -74,6 +58,26 @@ class ProfilePic extends StatefulWidget {
 class _ProfilePicState extends State<ProfilePic> {
   File? _pickedImageFile;
   final ImagePicker _picker = ImagePicker();
+  static const String _avatarPathKey = 'profile_avatar_path';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedAvatar();
+  }
+
+  Future<void> _loadSavedAvatar() async {
+    final prefs = await SharedPreferences.getInstance();
+    final path = prefs.getString(_avatarPathKey);
+    if (path == null) return;
+    final file = File(path);
+    if (await file.exists()) {
+      if (!mounted) return;
+      setState(() {
+        _pickedImageFile = file;
+      });
+    }
+  }
 
   Future<void> _pickFromGallery() async {
     try {
@@ -85,13 +89,39 @@ class _ProfilePicState extends State<ProfilePic> {
         imageQuality: 90,
       );
       if (picked == null) return;
-      setState(() {
-        _pickedImageFile = File(picked.path);
-      });
+      
+      final file = File(picked.path);
+      if (await file.exists()) {
+        setState(() {
+          _pickedImageFile = file;
+        });
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(_avatarPathKey, file.path);
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('File gambar tidak ditemukan'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } catch (e) {
       if (!mounted) return;
+      String errorMessage = 'Gagal mengambil gambar';
+      if (e.toString().contains('channel-error')) {
+        errorMessage = 'Plugin image picker tidak terhubung. Silakan restart aplikasi.';
+      } else if (e.toString().contains('permission')) {
+        errorMessage = 'Izin akses gambar ditolak. Silakan berikan izin di pengaturan.';
+      } else {
+        errorMessage = 'Gagal mengambil gambar: ${e.toString()}';
+      }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal mengambil gambar: $e')),
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 4),
+        ),
       );
     }
   }
@@ -195,11 +225,13 @@ class _ProfileInfoCard extends StatelessWidget {
     required this.name,
     required this.email,
     required this.password,
+    required this.favoriteCount,
   });
 
   final String? name;
   final String? email;
   final String? password;
+  final int favoriteCount;
 
   @override
   Widget build(BuildContext context) {
@@ -223,11 +255,30 @@ class _ProfileInfoCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          _InfoRow(label: 'Nama', value: name ?? '-'),
-          const SizedBox(height: 8),
-          _InfoRow(label: 'Email', value: email ?? '-'),
-          const SizedBox(height: 8),
-          _InfoRow(label: 'Password', value: password ?? '-'),
+          _InfoRow(
+            label: 'Nama',
+            value: name ?? '-',
+            iconSvg: nameIconSvg,
+            showDivider: true,
+          ),
+          _InfoRow(
+            label: 'Email',
+            value: email ?? '-',
+            iconSvg: emailIconSvg,
+            showDivider: true,
+          ),
+          _InfoRow(
+            label: 'Password',
+            value: password ?? '-',
+            iconSvg: passwordIconSvg,
+            showDivider: true,
+          ),
+          _InfoRow(
+            label: 'Favorite',
+            value: '$favoriteCount',
+            iconSvg: favoriteProfileIconSvg,
+            showDivider: false,
+          ),
         ],
       ),
     );
@@ -238,32 +289,66 @@ class _InfoRow extends StatelessWidget {
   const _InfoRow({
     required this.label,
     required this.value,
+    required this.iconSvg,
+    this.showDivider = false,
   });
 
   final String label;
   final String value;
+  final String iconSvg;
+  final bool showDivider;
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: Color(0xFF757575),
-            fontSize: 12,
-          ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 18,
+              height: 18,
+              child: SvgPicture.string(
+                iconSvg,
+                width: 18,
+                height: 18,
+                colorFilter: const ColorFilter.mode(
+                  Color(0xFF757575),
+                  BlendMode.srcIn,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              '$label:',
+              style: const TextStyle(
+                color: Color(0xFF757575),
+                fontSize: 12,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                value,
+                style: const TextStyle(
+                  color: Color(0xFF1F1F1F),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.right,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(
-            color: Color(0xFF1F1F1F),
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
+        if (showDivider) ...[
+          const SizedBox(height: 12),
+          const Divider(
+            height: 1,
+            thickness: 1,
+            color: Color(0xFFE0E0E0),
           ),
-        ),
+          const SizedBox(height: 12),
+        ],
       ],
     );
   }
@@ -297,4 +382,25 @@ const helpIconSvg =
 const logoutIconSvg =
     '''<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M4 3C2.89543 3 2 3.89543 2 5V19C2 20.1046 2.89543 21 4 21H11V19H4V5H11V3H4ZM21 12L16 7L14.59 8.41L17.17 11H9V13H17.17L14.59 15.59L16 17L21 12Z" fill="#757575"/>
+</svg>''';
+
+// Icons for Profile Info Card
+const nameIconSvg =
+    '''<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12ZM12 14C8.13401 14 5 17.134 5 21V22H19V21C19 17.134 15.866 14 12 14Z" fill="#757575"/>
+</svg>''';
+
+const emailIconSvg =
+    '''<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M15.3576 3.39368C15.5215 3.62375 15.4697 3.94447 15.2404 4.10954L9.80876 8.03862C9.57272 8.21053 9.29421 8.29605 9.01656 8.29605C8.7406 8.29605 8.4638 8.21138 8.22775 8.04204L2.76041 4.11039C2.53201 3.94618 2.47851 3.62546 2.64154 3.39454C2.80542 3.16362 3.12383 3.10974 3.35223 3.27566L8.81872 7.20645C8.93674 7.29112 9.09552 7.29197 9.2144 7.20559L14.6469 3.27651C14.8753 3.10974 15.1937 3.16447 15.3576 3.39368ZM16.9819 10.7763C16.9819 11.4366 16.4479 11.9745 15.7932 11.9745H2.20765C1.55215 11.9745 1.01892 11.4366 1.01892 10.7763V2.22368C1.01892 1.56342 1.55215 1.02632 2.20765 1.02632H15.7932C16.4479 1.02632 16.9819 1.56342 16.9819 2.22368V10.7763ZM15.7932 0H2.20765C0.990047 0 0 0.998092 0 2.22368V10.7763C0 12.0028 0.990047 13 2.20765 13H15.7932C17.01 13 18 12.0028 18 10.7763V2.22368C18 0.998092 17.01 0 15.7932 0Z" fill="#757575"/>
+</svg>''';
+
+const passwordIconSvg =
+    '''<svg width="18" height="18" viewBox="0 0 15 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M9.24419 11.5472C9.24419 12.4845 8.46279 13.2453 7.5 13.2453C6.53721 13.2453 5.75581 12.4845 5.75581 11.5472C5.75581 10.6098 6.53721 9.84906 7.5 9.84906C8.46279 9.84906 9.24419 10.6098 9.24419 11.5472ZM13.9535 14.0943C13.9535 15.6863 12.6235 16.9811 10.9884 16.9811H4.01163C2.37645 16.9811 1.04651 15.6863 1.04651 14.0943V9C1.04651 7.40802 2.37645 6.11321 4.01163 6.11321H10.9884C12.6235 6.11321 13.9535 7.40802 13.9535 9V14.0943ZM4.53488 3.90566C4.53488 2.31368 5.86483 1.01887 7.5 1.01887C8.28488 1.01887 9.03139 1.31943 9.59477 1.86028C10.1564 2.41387 10.4651 3.14066 10.4651 3.90566V5.09434H4.53488V3.90566ZM11.5116 5.12745V3.90566C11.5116 2.87151 11.0956 1.89085 10.3352 1.14028C9.5686 0.405 8.56221 0 7.5 0C5.2875 0 3.48837 1.7516 3.48837 3.90566V5.12745C1.52267 5.37792 0 7.01915 0 9V14.0943C0 16.2484 1.79913 18 4.01163 18H10.9884C13.2 18 15 16.2484 15 14.0943V9C15 7.01915 13.4773 5.37792 11.5116 5.12745Z" fill="#757575"/>
+</svg>''';
+
+const favoriteProfileIconSvg =
+    '''<svg width="18" height="18" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M19.1585 10.6702L11.2942 18.6186C11.1323 18.7822 10.8687 18.7822 10.7058 18.6186L2.84145 10.6702C1.81197 9.62861 1.2443 8.24408 1.2443 6.77039C1.2443 5.29671 1.81197 3.91218 2.84145 2.87063C3.90622 1.79552 5.30308 1.25744 6.70098 1.25744C8.09887 1.25744 9.49573 1.79552 10.5605 2.87063C10.8033 3.11607 11.1967 3.11607 11.4405 2.87063C13.568 0.720415 17.03 0.720415 19.1585 2.87063C20.188 3.91113 20.7557 5.29566 20.7557 6.77039C20.7557 8.24408 20.188 9.62966 19.1585 10.6702ZM20.0386 1.98013C17.5687 -0.516223 13.6313 -0.652578 11.0005 1.57316C8.36973 -0.652578 4.43342 -0.516223 1.96245 1.98013C0.696354 3.25977 0 4.96001 0 6.77039C0 8.57972 0.696354 10.281 1.96245 11.5607L9.82678 19.5091C10.1495 19.8364 10.575 20 11.0005 20C11.426 20 11.8505 19.8364 12.1743 19.5091L20.0386 11.5607C21.3036 10.2821 22 8.58077 22 6.77039C22 4.96001 21.3036 3.25872 20.0386 1.98013Z" fill="#757575"/>
 </svg>''';

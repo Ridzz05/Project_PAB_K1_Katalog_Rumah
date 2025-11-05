@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({
@@ -62,8 +64,37 @@ class ProfileScreen extends StatelessWidget {
   }
 }
 
-class ProfilePic extends StatelessWidget {
+class ProfilePic extends StatefulWidget {
   const ProfilePic({super.key});
+
+  @override
+  State<ProfilePic> createState() => _ProfilePicState();
+}
+
+class _ProfilePicState extends State<ProfilePic> {
+  File? _pickedImageFile;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickFromGallery() async {
+    try {
+      final XFile? picked = await _picker.pickImage(
+        source: ImageSource.gallery,
+        requestFullMetadata: false,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 90,
+      );
+      if (picked == null) return;
+      setState(() {
+        _pickedImageFile = File(picked.path);
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal mengambil gambar: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,9 +105,12 @@ class ProfilePic extends StatelessWidget {
         fit: StackFit.expand,
         clipBehavior: Clip.none,
         children: [
-          const CircleAvatar(
-            backgroundImage:
-                NetworkImage("https://i.postimg.cc/0jqKB6mS/Profile-Image.png"),
+          CircleAvatar(
+            backgroundImage: _pickedImageFile != null
+                ? FileImage(_pickedImageFile!)
+                : const NetworkImage(
+                    "https://i.postimg.cc/0jqKB6mS/Profile-Image.png",
+                  ) as ImageProvider,
           ),
           Positioned(
             right: -16,
@@ -93,7 +127,7 @@ class ProfilePic extends StatelessWidget {
                   ),
                   backgroundColor: const Color(0xFFF5F6F9),
                 ),
-                onPressed: () {},
+                onPressed: _pickFromGallery,
                 child: SvgPicture.string(cameraIcon),
               ),
             ),

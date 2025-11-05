@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-const String authIconAsset = 'assets/logo/unifind.svg';
+const String authIconAsset = 'images/unifind.jpg';
 
 const authOutlineInputBorder = OutlineInputBorder(
   borderSide: BorderSide(color: Color(0xFF757575)),
@@ -13,12 +13,33 @@ class SignInScreen extends StatelessWidget {
     super.key,
     required this.onSubmit,
     required this.isLoading,
+    required this.onRegister,
     this.errorMessage,
   });
 
   final Future<void> Function(String email, String password) onSubmit;
   final bool isLoading;
+  final Future<String?> Function(String name, String email, String password)
+      onRegister;
   final String? errorMessage;
+
+  Future<void> _openRegister(BuildContext context) async {
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => RegisterScreen(
+          onRegister: onRegister,
+        ),
+      ),
+    );
+
+    if (result == true && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Akun berhasil dibuat. Silakan masuk.'),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +81,9 @@ class SignInScreen extends StatelessWidget {
                     errorMessage: errorMessage,
                   ),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.08),
-                  const NoAccountText(),
+                  NoAccountText(
+                    onTap: () => _openRegister(context),
+                  ),
                 ],
               ),
             ),
@@ -254,13 +277,12 @@ class _AuthLogo extends StatelessWidget {
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,
-      child: SvgPicture.asset(
-        authIconAsset,
-        width: 40,
-        height: 40,
-        colorFilter: const ColorFilter.mode(
-          Color(0xFFFF7643),
-          BlendMode.srcIn,
+      child: ClipOval(
+        child: Image.asset(
+          authIconAsset,
+          width: 96,
+          height: 96,
+          fit: BoxFit.cover,
         ),
       ),
     );
@@ -268,7 +290,9 @@ class _AuthLogo extends StatelessWidget {
 }
 
 class NoAccountText extends StatelessWidget {
-  const NoAccountText({super.key});
+  const NoAccountText({super.key, required this.onTap});
+
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -276,19 +300,266 @@ class NoAccountText extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Text(
-          "Don’t have an account? ",
+          "Belum punya akun? ",
           style: TextStyle(color: Color(0xFF757575)),
         ),
         GestureDetector(
-          onTap: () {},
+          onTap: onTap,
           child: const Text(
-            "Sign Up",
+            "Daftar Disini",
             style: TextStyle(
               color: Color(0xFFFF7643),
             ),
           ),
         ),
       ],
+    );
+  }
+}
+
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({
+    super.key,
+    required this.onRegister,
+  });
+
+  final Future<String?> Function(String name, String email, String password)
+      onRegister;
+
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late final TextEditingController _nameController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _passwordController;
+
+  String? _errorMessage;
+  bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController();
+    _emailController = TextEditingController();
+    _passwordController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleSubmit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isSubmitting = true;
+      _errorMessage = null;
+    });
+
+    final error = await widget.onRegister(
+      _nameController.text.trim(),
+      _emailController.text.trim(),
+      _passwordController.text.trim(),
+    );
+
+    if (!mounted) return;
+
+    if (error != null) {
+      setState(() {
+        _errorMessage = error;
+        _isSubmitting = false;
+      });
+      return;
+    }
+
+    Navigator.of(context).pop(true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Sign Up'),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Center(
+                  child: _AuthLogo(),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Lengkapi data Anda untuk membuat akun baru.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color(0xFF757575),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Data ini disimpan secara lokal sehingga Anda dapat masuk kembali tanpa koneksi internet.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color(0xFF9E9E9E),
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                TextFormField(
+                  controller: _nameController,
+                  textCapitalization: TextCapitalization.words,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                    hintText: "Masukkan Nama Anda",
+                    labelText: "Nama",
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    hintStyle: const TextStyle(color: Color(0xFF757575)),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    border: authOutlineInputBorder,
+                    enabledBorder: authOutlineInputBorder,
+                    focusedBorder: authOutlineInputBorder.copyWith(
+                      borderSide: const BorderSide(color: Color(0xFFFF7643)),
+                    ),
+                  ),
+                  validator: (value) {
+                    final name = (value ?? '').trim();
+                    if (name.isEmpty) {
+                      return 'Nama wajib diisi.';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _emailController,
+                  textInputAction: TextInputAction.next,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    hintText: "Masukkan email Anda",
+                    labelText: "Email",
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    hintStyle: const TextStyle(color: Color(0xFF757575)),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    suffix: SvgPicture.string(
+                      mailIcon,
+                    ),
+                    border: authOutlineInputBorder,
+                    enabledBorder: authOutlineInputBorder,
+                    focusedBorder: authOutlineInputBorder.copyWith(
+                      borderSide: const BorderSide(color: Color(0xFFFF7643)),
+                    ),
+                  ),
+                  validator: (value) {
+                    final email = (value ?? '').trim();
+                    if (email.isEmpty) {
+                      return 'Email wajib diisi.';
+                    }
+                    final emailRegExp =
+                        RegExp(r'^[^@]+@[^@]+\.[^@]+', caseSensitive: false);
+                    if (!emailRegExp.hasMatch(email)) {
+                      return 'Format email tidak valid.';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _passwordController,
+                  textInputAction: TextInputAction.done,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    hintText: "Masukkan password Anda",
+                    labelText: "Password",
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    hintStyle: const TextStyle(color: Color(0xFF757575)),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    suffix: SvgPicture.string(
+                      lockIcon,
+                    ),
+                    border: authOutlineInputBorder,
+                    enabledBorder: authOutlineInputBorder,
+                    focusedBorder: authOutlineInputBorder.copyWith(
+                      borderSide: const BorderSide(color: Color(0xFFFF7643)),
+                    ),
+                  ),
+                  validator: (value) {
+                    final password = (value ?? '').trim();
+                    if (password.isEmpty) {
+                      return 'Password wajib diisi.';
+                    }
+                    if (password.length < 6) {
+                      return 'Password minimal 6 karakter.';
+                    }
+                    return null;
+                  },
+                ),
+                if (_errorMessage != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: Text(
+                      _errorMessage!,
+                      style: const TextStyle(
+                        color: Color(0xFFFF4848),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: _isSubmitting ? null : _handleSubmit,
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    backgroundColor: const Color(0xFFFF7643),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 48),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(16)),
+                    ),
+                  ),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    child: _isSubmitting
+                        ? const SizedBox(
+                            key: ValueKey('register-loading'),
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            "Register",
+                            key: ValueKey('register-label'),
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -74,6 +74,7 @@ class AuthGate extends StatelessWidget {
               key: const ValueKey('sign-in'),
               onSubmit: auth.login,
               isLoading: auth.isLoading,
+              onRegister: auth.register,
               errorMessage: auth.errorMessage,
             ),
     );
@@ -159,6 +160,7 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = AuthScope.of(context);
     final tabs = <Widget>[
       HomeTab(
         universities: demoUniversities,
@@ -178,7 +180,12 @@ class _AppShellState extends State<AppShell> {
             .toList(),
         onToggleFavorite: _toggleFavorite,
       ),
-      ProfileScreen(onLogout: widget.onLogout),
+      ProfileScreen(
+        onLogout: widget.onLogout,
+        userName: auth.userName,
+        userEmail: auth.userEmail,
+        userPassword: auth.userPassword,
+      ),
     ];
 
     return Scaffold(

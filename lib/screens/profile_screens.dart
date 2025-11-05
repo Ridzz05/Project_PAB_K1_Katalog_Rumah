@@ -2,9 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key, required this.onLogout});
+  const ProfileScreen({
+    super.key,
+    required this.onLogout,
+    this.userName,
+    this.userEmail,
+    this.userPassword,
+  });
 
   final VoidCallback onLogout;
+  final String? userName;
+  final String? userEmail;
+  final String? userPassword;
 
   @override
   Widget build(BuildContext context) {
@@ -14,6 +23,12 @@ class ProfileScreen extends StatelessWidget {
         child: Column(
           children: [
             const ProfilePic(),
+            const SizedBox(height: 20),
+            _ProfileInfoCard(
+              name: userName,
+              email: userEmail,
+              password: userPassword,
+            ),
             const SizedBox(height: 20),
             ProfileMenu(
               text: "My Account",
@@ -137,6 +152,85 @@ class ProfileMenu extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ProfileInfoCard extends StatelessWidget {
+  const _ProfileInfoCard({
+    required this.name,
+    required this.email,
+    required this.password,
+  });
+
+  final String? name;
+  final String? email;
+  final String? password;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F6F9),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Data Akun',
+            style: TextStyle(
+              color: Color(0xFF1F1F1F),
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _InfoRow(label: 'Nama', value: name ?? '-'),
+          const SizedBox(height: 8),
+          _InfoRow(label: 'Email', value: email ?? '-'),
+          const SizedBox(height: 8),
+          _InfoRow(label: 'Password', value: password ?? '-'),
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: Color(0xFF757575),
+            fontSize: 12,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Color(0xFF1F1F1F),
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 }

@@ -58,31 +58,46 @@ class SignInScreen extends StatelessWidget {
               child: Column(
                 children: [
                   const SizedBox(height: 24),
-                  const _AuthLogo(),
+                  const _FadeSlide(
+                    delayMs: 0,
+                    child: _AuthLogo(),
+                  ),
                   const SizedBox(height: 16),
-                  const Text(
-                    "UniFinder",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                  const _FadeSlide(
+                    delayMs: 100,
+                    child: Text(
+                      "UniFinder",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
-                  const Text(
-                    "Selamat Datang Di Aplikasi Daftar Universitas Di Sumatera Selatan",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Color(0xFF757575)),
+                  const _FadeSlide(
+                    delayMs: 200,
+                    child: Text(
+                      "Selamat Datang Di Aplikasi Daftar Universitas Di Sumatera Selatan",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Color(0xFF757575)),
+                    ),
                   ),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-                  SignInForm(
-                    onSubmit: onSubmit,
-                    isLoading: isLoading,
-                    errorMessage: errorMessage,
+                  _FadeSlide(
+                    delayMs: 300,
+                    child: SignInForm(
+                      onSubmit: onSubmit,
+                      isLoading: isLoading,
+                      errorMessage: errorMessage,
+                    ),
                   ),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.08),
-                  NoAccountText(
-                    onTap: () => _openRegister(context),
+                  _FadeSlide(
+                    delayMs: 400,
+                    child: NoAccountText(
+                      onTap: () => _openRegister(context),
+                    ),
                   ),
                 ],
               ),
@@ -241,7 +256,20 @@ class _SignInFormState extends State<SignInForm> {
               ),
             ),
             child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
+              duration: const Duration(milliseconds: 350),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              transitionBuilder: (child, animation) {
+                final fade = CurvedAnimation(parent: animation, curve: Curves.easeOut);
+                final scale = Tween<double>(begin: 0.96, end: 1).animate(CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOutBack,
+                ));
+                return FadeTransition(
+                  opacity: fade,
+                  child: ScaleTransition(scale: scale, child: child),
+                );
+              },
               child: widget.isLoading
                   ? const SizedBox(
                       key: ValueKey('loading'),
@@ -538,7 +566,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
+                    duration: const Duration(milliseconds: 350),
+                    switchInCurve: Curves.easeOutCubic,
+                    switchOutCurve: Curves.easeInCubic,
+                    transitionBuilder: (child, animation) {
+                      final fade = CurvedAnimation(parent: animation, curve: Curves.easeOut);
+                      final scale = Tween<double>(begin: 0.96, end: 1).animate(CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.easeOutBack,
+                      ));
+                      return FadeTransition(
+                        opacity: fade,
+                        child: ScaleTransition(scale: scale, child: child),
+                      );
+                    },
                     child: _isSubmitting
                         ? const SizedBox(
                             key: ValueKey('register-loading'),
@@ -560,6 +601,55 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _FadeSlide extends StatefulWidget {
+  const _FadeSlide({
+    required this.child,
+    this.delayMs = 0,
+  });
+
+  final Widget child;
+  final int delayMs;
+
+  @override
+  State<_FadeSlide> createState() => _FadeSlideState();
+}
+
+class _FadeSlideState extends State<_FadeSlide> {
+  bool _started = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(milliseconds: widget.delayMs), () {
+      if (!mounted) return;
+      setState(() {
+        _started = true;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const double beginOffsetY = 12;
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: _started ? 1 : 0),
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeOutCubic,
+      builder: (context, t, child) {
+        final dy = (1 - t) * beginOffsetY;
+        return Opacity(
+          opacity: t,
+          child: Transform.translate(
+            offset: Offset(0, dy),
+            child: child,
+          ),
+        );
+      },
+      child: widget.child,
     );
   }
 }

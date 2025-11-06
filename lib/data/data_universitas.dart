@@ -6,6 +6,7 @@ class University {
   final String speciality;
   final String description;
   final bool isFavorite;
+  final bool isAsset;
 
   const University({
     required this.id,
@@ -15,71 +16,59 @@ class University {
     this.speciality = '',
     this.description = '',
     this.isFavorite = false,
+    this.isAsset = false,
   });
 }
 
 const List<University> demoUniversities = [
   University(
     id: 1,
-    name: 'Universitas Indonesia',
-    location: 'Depok, Jawa Barat',
-    speciality: 'Kedokteran & Ilmu Sosial terbaik',
+    name: 'Universitas Multi Data Palembang',
+    location: 'Palembang, Sumatera Selatan',
+    speciality: 'Teknik, Kedokteran & Agribisnis unggulan',
     description:
-        'Universitas Indonesia adalah perguruan tinggi negeri terkemuka di Indonesia yang dikenal dengan program studi kedokteran dan ilmu sosial yang unggul. Kampus ini memiliki fasilitas lengkap dan dosen berpengalaman.',
-    imageUrl:
-        'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=720&q=80',
-    isFavorite: true,
+        'Universitas Multi Data Palembang (MDP) adalah perguruan tinggi swasta di Sumatera Selatan yang berfokus pada bidang teknologi informasi, bisnis, dan desain. Kampus ini dikenal dengan pendekatan pembelajaran praktis, kurikulum berbasis industri, serta kerjasama luas dengan perusahaan teknologi nasional. MDP juga menjadi pelopor pendidikan berbasis digital di Palembang dengan berbagai fasilitas modern seperti laboratorium komputer, inkubator startup, dan pusat inovasi mahasiswa.:contentReference[oaicite:0]{index=0}',
+    imageUrl: 'images/univ_preview/mdp.png',
+    isAsset: true,
   ),
   University(
     id: 2,
-    name: 'Institut Teknologi Bandung',
-    location: 'Bandung, Jawa Barat',
-    speciality: 'Teknik & Sains teratas',
+    name: 'Universitas Bina Darma',
+    location: 'Palembang, Sumatera Selatan',
+    speciality: 'Teknologi Informasi & Komunikasi modern',
     description:
-        'Institut Teknologi Bandung merupakan perguruan tinggi teknik terbaik di Indonesia yang menghasilkan lulusan berkualitas tinggi di bidang teknik dan sains. Kampus ini memiliki tradisi akademik yang kuat dan banyak menghasilkan inovator.',
+        'Universitas Bina Darma (UBD) adalah universitas swasta di Palembang yang fokus pada teknologi informasi, komunikasi, dan vokasi, dengan berbagai fakultas teknik & humaniora. :contentReference[oaicite:1]{index=1}',
     imageUrl:
         'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=720&q=80',
   ),
   University(
     id: 3,
-    name: 'Universitas Gadjah Mada',
-    location: 'Yogyakarta, DIY',
-    speciality: 'Riset multidisiplin unggulan',
+    name: 'Universitas Islam Negeri Raden Fatah',
+    location: 'Palembang, Sumatera Selatan',
+    speciality: 'Ilmu Sosial Islam & Teknologi',
     description:
-        'Universitas Gadjah Mada adalah universitas negeri terkemuka yang dikenal dengan pendekatan riset multidisiplin. Kampus ini menawarkan berbagai program studi dengan kualitas tinggi dan lingkungan akademik yang mendukung perkembangan mahasiswa.',
+        'Universitas Islam Negeri (UIN) Raden Fatah Palembang awalnya IAIN dan kini menjadi universitas negeri yang menggabungkan studi agama Islam dan ilmu umum.',
     imageUrl:
         'https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=720&q=80',
-    isFavorite: true,
   ),
   University(
     id: 4,
-    name: 'Institut Pertanian Bogor',
-    location: 'Bogor, Jawa Barat',
-    speciality: 'Agrokompleks dan lingkungan',
+    name: 'Universitas Muhammadiyah Palembang',
+    location: 'Palembang, Sumatera Selatan',
+    speciality: 'Unggul & Islami – Kesehatan & Teknik',
     description:
-        'Institut Pertanian Bogor adalah perguruan tinggi unggulan di bidang pertanian, agrokompleks, dan lingkungan. Kampus ini memiliki keahlian khusus dalam pengembangan teknologi pertanian dan pelestarian lingkungan.',
+        'Universitas Muhammadiyah Palembang (UMP) adalah universitas swasta besar di Sumsel dengan slogan “Unggul & Islami”, memiliki berbagai program studi termasuk kesehatan dan teknik.',
     imageUrl:
         'https://images.unsplash.com/photo-1533228100845-08145b01de14?auto=format&fit=crop&w=720&q=80',
   ),
   University(
     id: 5,
-    name: 'Universitas Airlangga',
-    location: 'Surabaya, Jawa Timur',
-    speciality: 'Kesehatan & bisnis kompetitif',
+    name: 'Universitas Sumatera Selatan',
+    location: 'Palembang, Sumatera Selatan',
+    speciality: 'Sains, Teknologi & Humaniora relevan zaman',
     description:
-        'Universitas Airlangga adalah universitas negeri yang unggul di bidang kesehatan dan bisnis. Kampus ini memiliki fakultas kedokteran dan manajemen yang sangat kompetitif dengan program studi yang relevan dengan kebutuhan industri.',
+        'Universitas Sumatera Selatan (USS) berdiri pada tahun 2019 di Palembang, fokus pada pendidikan tinggi yang berkualitas di bidang sains, teknologi, dan humaniora.',
     imageUrl:
         'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=720&q=80',
   ),
-  University(
-    id: 6,
-    name: 'Binus University',
-    location: 'Jakarta, DKI Jakarta',
-    speciality: 'Teknologi & bisnis modern',
-    description:
-        'Binus University adalah universitas swasta terkemuka yang fokus pada teknologi dan bisnis modern. Kampus ini dikenal dengan program studi teknologi informasi dan manajemen bisnis yang mengikuti perkembangan zaman.',
-    imageUrl:
-        'https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=720&q=80',
-  ),
 ];
-

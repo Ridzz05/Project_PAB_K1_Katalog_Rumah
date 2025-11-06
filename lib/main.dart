@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -333,7 +335,7 @@ class _HomeGridView extends StatelessWidget {
         crossAxisCount: 2,
         mainAxisSpacing: 16,
         crossAxisSpacing: 16,
-        childAspectRatio: 0.8,
+        childAspectRatio: 1,
       ),
       itemBuilder: (context, index) {
         final university = universities[index];
@@ -657,6 +659,7 @@ class UniversityTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final imageProvider = _imageProviderFor(university);
     return Material(
       color: Colors.white,
       shape: RoundedRectangleBorder(
@@ -672,8 +675,8 @@ class UniversityTile extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  university.imageUrl,
+                child: Image(
+                  image: imageProvider,
                   width: 56,
                   height: 56,
                   fit: BoxFit.cover,
@@ -775,85 +778,106 @@ class UniversityGridCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final imageProvider = _imageProviderFor(university);
     return Material(
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: Color(0xFFE9E9E9)),
-      ),
+      color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        topRight: Radius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE9E9E9)),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: Image(
+                    image: imageProvider,
+                    fit: BoxFit.cover,
+                    filterQuality: FilterQuality.medium,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      color: const Color(0xFFF0F0F0),
+                      alignment: Alignment.center,
+                      child: const Icon(
+                        Icons.school_outlined,
+                        color: Color(0xFFB6B6B6),
+                        size: 32,
                       ),
-                      child: Image.network(
-                        university.imageUrl,
-                        fit: BoxFit.cover,
-                        filterQuality: FilterQuality.medium,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          color: const Color(0xFFF0F0F0),
-                          alignment: Alignment.center,
-                          child: const Icon(
-                            Icons.school_outlined,
-                            color: Color(0xFFB6B6B6),
-                            size: 32,
+                    ),
+                  ),
+                ),
+                if (isFavorite)
+                  Positioned(
+                    top: 10,
+                    right: 10,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: const Color(0x59000000),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.favorite,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(16),
+                      bottomRight: Radius.circular(16),
+                    ),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                        decoration: const BoxDecoration(
+                          color: Color(0x80FFFFFF),
+                          border: Border(
+                            top: BorderSide(
+                              color: Color(0x66FFFFFF),
+                              width: 0.75,
+                            ),
                           ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              university.name,
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF1F1F1F),
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'lihat detail lengkap',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: const Color(0xFF555555),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ),
-                  if (isFavorite)
-                    Positioned(
-                      top: 10,
-                      right: 10,
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: const Color(0x59000000),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.favorite,
-                          size: 16,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
-              child: Text(
-                university.name,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF1F1F1F),
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              child: Text(
-                'lihat detail lengkap',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: const Color(0xFF7A7A7A),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -893,8 +917,8 @@ class UniversityDetailScreen extends StatelessWidget {
               background: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.network(
-                    university.imageUrl,
+                  Image(
+                    image: _imageProviderFor(university),
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) => Container(
                       color: const Color(0xFFF0F0F0),
@@ -1042,6 +1066,13 @@ class UniversityDetailScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+ImageProvider<Object> _imageProviderFor(University university) {
+  if (university.isAsset) {
+    return AssetImage(university.imageUrl);
+  }
+  return NetworkImage(university.imageUrl);
 }
 
 const String searchIcon =

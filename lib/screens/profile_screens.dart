@@ -89,7 +89,7 @@ class _ProfilePicState extends State<ProfilePic> {
         imageQuality: 90,
       );
       if (picked == null) return;
-      
+
       final file = File(picked.path);
       if (await file.exists()) {
         setState(() {
@@ -110,9 +110,11 @@ class _ProfilePicState extends State<ProfilePic> {
       if (!mounted) return;
       String errorMessage = 'Gagal mengambil gambar';
       if (e.toString().contains('channel-error')) {
-        errorMessage = 'Plugin image picker tidak terhubung. Silakan restart aplikasi.';
+        errorMessage =
+            'Plugin image picker tidak terhubung. Silakan restart aplikasi.';
       } else if (e.toString().contains('permission')) {
-        errorMessage = 'Izin akses gambar ditolak. Silakan berikan izin di pengaturan.';
+        errorMessage =
+            'Izin akses gambar ditolak. Silakan berikan izin di pengaturan.';
       } else {
         errorMessage = 'Gagal mengambil gambar: ${e.toString()}';
       }
@@ -139,8 +141,9 @@ class _ProfilePicState extends State<ProfilePic> {
             backgroundImage: _pickedImageFile != null
                 ? FileImage(_pickedImageFile!)
                 : const NetworkImage(
-                    "https://i.postimg.cc/0jqKB6mS/Profile-Image.png",
-                  ) as ImageProvider,
+                        "https://i.postimg.cc/0jqKB6mS/Profile-Image.png",
+                      )
+                      as ImageProvider,
           ),
           Positioned(
             right: -16,
@@ -161,7 +164,7 @@ class _ProfilePicState extends State<ProfilePic> {
                 child: SvgPicture.string(cameraIcon),
               ),
             ),
-          )
+          ),
         ],
       ),
     );
@@ -187,8 +190,9 @@ class ProfileMenu extends StatelessWidget {
         style: TextButton.styleFrom(
           foregroundColor: const Color(0xFFFF7643),
           padding: const EdgeInsets.all(20),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
           backgroundColor: const Color(0xFFF5F6F9),
         ),
         onPressed: press,
@@ -196,23 +200,20 @@ class ProfileMenu extends StatelessWidget {
           children: [
             SvgPicture.string(
               iconSvg,
-              colorFilter:
-                  const ColorFilter.mode(Color(0xFFFF7643), BlendMode.srcIn),
+              colorFilter: const ColorFilter.mode(
+                Color(0xFFFF7643),
+                BlendMode.srcIn,
+              ),
               width: 22,
             ),
             const SizedBox(width: 20),
             Expanded(
               child: Text(
                 text,
-                style: const TextStyle(
-                  color: Color(0xFF757575),
-                ),
+                style: const TextStyle(color: Color(0xFF757575)),
               ),
             ),
-            const Icon(
-              Icons.arrow_forward_ios,
-              color: Color(0xFF757575),
-            ),
+            const Icon(Icons.arrow_forward_ios, color: Color(0xFF757575)),
           ],
         ),
       ),
@@ -302,53 +303,57 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 18,
-              height: 18,
-              child: SvgPicture.string(
-                iconSvg,
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
                 width: 18,
                 height: 18,
-                colorFilter: const ColorFilter.mode(
-                  Color(0xFF757575),
-                  BlendMode.srcIn,
+                child: SvgPicture.string(
+                  iconSvg,
+                  width: 18,
+                  height: 18,
+                  colorFilter: const ColorFilter.mode(
+                    Color(0xFF757575),
+                    BlendMode.srcIn,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              '$label:',
-              style: const TextStyle(
-                color: Color(0xFF757575),
-                fontSize: 12,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                value,
-                style: const TextStyle(
-                  color: Color(0xFF1F1F1F),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 3,
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    color: Color(0xFF757575),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-                textAlign: TextAlign.right,
               ),
-            ),
-          ],
-        ),
-        if (showDivider) ...[
-          const SizedBox(height: 12),
-          const Divider(
-            height: 1,
-            thickness: 1,
-            color: Color(0xFFE0E0E0),
+              Expanded(
+                flex: 4,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    value,
+                    style: const TextStyle(
+                      color: Color(0xFF1F1F1F),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.right,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
-        ],
+        ),
+        if (showDivider)
+          const Divider(height: 1, thickness: 1, color: Color(0xFFE0E0E0)),
       ],
     );
   }

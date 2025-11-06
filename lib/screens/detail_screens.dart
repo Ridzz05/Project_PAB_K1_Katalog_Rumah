@@ -68,7 +68,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                   background: Stack(
                     fit: StackFit.expand,
                     children: [
-                      Image.network(
+                      Image.asset(
                         widget.university.imageUrl,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) => Container(
@@ -121,6 +121,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                       ),
                       const SizedBox(height: 8),
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Icon(
                             Icons.location_on,
@@ -128,11 +129,16 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                             color: Color(0xFF7A7A7A),
                           ),
                           const SizedBox(width: 4),
-                          Text(
-                            widget.university.location,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Color(0xFF7A7A7A),
+                          Expanded(
+                            child: Text(
+                              widget.university.location,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Color(0xFF7A7A7A),
+                                height: 1.4,
+                              ),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],

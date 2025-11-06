@@ -44,7 +44,8 @@ class _MyAppState extends State<MyApp> {
           appBarTheme: const AppBarTheme(
             backgroundColor: Colors.white,
             foregroundColor: Color(0xFF1F1F1F),
-            centerTitle: true,
+            centerTitle: false,
+            titleSpacing: 20,
             elevation: 0,
             titleTextStyle: TextStyle(
               fontSize: 18,
@@ -537,12 +538,11 @@ class UniversityTile extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.network(
+                child: Image.asset(
                   university.imageUrl,
                   width: 56,
                   height: 56,
                   fit: BoxFit.cover,
-                  filterQuality: FilterQuality.medium,
                   errorBuilder: (context, error, stackTrace) => Container(
                     width: 56,
                     height: 56,
@@ -580,6 +580,8 @@ class UniversityTile extends StatelessWidget {
                           color: Color(0xFF7A7A7A),
                           height: 1.4,
                         ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       )
                     else
                       Text(

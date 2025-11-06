@@ -5,8 +5,10 @@ class University {
   final String imageUrl;
   final String speciality;
   final String description;
+  final List<String> faculties;
+  final List<String> programs;
+  final List<String> facilities;
   final bool isFavorite;
-  final bool isAsset;
 
   const University({
     required this.id,
@@ -15,60 +17,201 @@ class University {
     required this.imageUrl,
     this.speciality = '',
     this.description = '',
+    this.faculties = const [],
+    this.programs = const [],
+    this.facilities = const [],
     this.isFavorite = false,
-    this.isAsset = false,
   });
 }
 
 const List<University> demoUniversities = [
   University(
     id: 1,
-    name: 'Universitas Multi Data Palembang',
-    location: 'Palembang, Sumatera Selatan',
-    speciality: 'Teknik, Kedokteran & Agribisnis unggulan',
+    name: 'Universitas Indonesia',
+    location: 'Depok, Jawa Barat',
+    speciality: 'Kedokteran & Ilmu Sosial terbaik',
     description:
-        'Universitas Multi Data Palembang (MDP) adalah perguruan tinggi swasta di Sumatera Selatan yang berfokus pada bidang teknologi informasi, bisnis, dan desain. Kampus ini dikenal dengan pendekatan pembelajaran praktis, kurikulum berbasis industri, serta kerjasama luas dengan perusahaan teknologi nasional. MDP juga menjadi pelopor pendidikan berbasis digital di Palembang dengan berbagai fasilitas modern seperti laboratorium komputer, inkubator startup, dan pusat inovasi mahasiswa.:contentReference[oaicite:0]{index=0}',
-    imageUrl: 'images/univ_preview/mdp.png',
-    isAsset: true,
+        'Universitas Indonesia adalah perguruan tinggi negeri terkemuka di Indonesia yang dikenal dengan program studi kedokteran dan ilmu sosial yang unggul. Kampus ini memiliki fasilitas lengkap dan dosen berpengalaman.',
+    faculties: [
+      'Fakultas Kedokteran',
+      'Fakultas Ilmu Sosial dan Ilmu Politik',
+      'Fakultas Teknik',
+      'Fakultas Ekonomi dan Bisnis',
+    ],
+    programs: [
+      'Kedokteran',
+      'Ilmu Komunikasi',
+      'Teknik Informatika',
+      'Manajemen',
+      'Psikologi',
+    ],
+    facilities: [
+      'Perpustakaan Digital',
+      'Laboratorium Modern',
+      'Asrama Mahasiswa',
+      'Fasilitas Olahraga',
+      'Kantin Sehat',
+      'WiFi Kampus',
+    ],
+    imageUrl:
+        'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=720&q=80',
+    isFavorite: true,
   ),
   University(
     id: 2,
-    name: 'Universitas Bina Darma',
-    location: 'Palembang, Sumatera Selatan',
-    speciality: 'Teknologi Informasi & Komunikasi modern',
+    name: 'Institut Teknologi Bandung',
+    location: 'Bandung, Jawa Barat',
+    speciality: 'Teknik & Sains teratas',
     description:
-        'Universitas Bina Darma (UBD) adalah universitas swasta di Palembang yang fokus pada teknologi informasi, komunikasi, dan vokasi, dengan berbagai fakultas teknik & humaniora. :contentReference[oaicite:1]{index=1}',
+        'Institut Teknologi Bandung merupakan perguruan tinggi teknik terbaik di Indonesia yang menghasilkan lulusan berkualitas tinggi di bidang teknik dan sains. Kampus ini memiliki tradisi akademik yang kuat dan banyak menghasilkan inovator.',
+    faculties: [
+      'Fakultas Teknik Sipil dan Lingkungan',
+      'Fakultas Teknik Mesin dan Dirgantara',
+      'Fakultas Matematika dan Ilmu Pengetahuan Alam',
+      'Sekolah Bisnis dan Manajemen',
+    ],
+    programs: [
+      'Teknik Sipil',
+      'Teknik Mesin',
+      'Teknik Elektro',
+      'Teknik Informatika',
+      'Matematika',
+    ],
+    facilities: [
+      'Lab Riset Canggih',
+      'Perpustakaan Teknik',
+      'Workshop Mesin',
+      'Studio Desain',
+      'Kantin Kampus',
+      'Gedung Serba Guna',
+    ],
     imageUrl:
         'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=720&q=80',
   ),
   University(
     id: 3,
-    name: 'Universitas Islam Negeri Raden Fatah',
-    location: 'Palembang, Sumatera Selatan',
-    speciality: 'Ilmu Sosial Islam & Teknologi',
+    name: 'Universitas Gadjah Mada',
+    location: 'Yogyakarta, DIY',
+    speciality: 'Riset multidisiplin unggulan',
     description:
-        'Universitas Islam Negeri (UIN) Raden Fatah Palembang awalnya IAIN dan kini menjadi universitas negeri yang menggabungkan studi agama Islam dan ilmu umum.',
+        'Universitas Gadjah Mada adalah universitas negeri terkemuka yang dikenal dengan pendekatan riset multidisiplin. Kampus ini menawarkan berbagai program studi dengan kualitas tinggi dan lingkungan akademik yang mendukung perkembangan mahasiswa.',
+    faculties: [
+      'Fakultas Teknik',
+      'Fakultas Ekonomika dan Bisnis',
+      'Fakultas Hukum',
+      'Fakultas Kedokteran',
+    ],
+    programs: [
+      'Teknik Sipil',
+      'Ekonomi Pembangunan',
+      'Hukum',
+      'Kedokteran',
+      'Teknik Industri',
+    ],
+    facilities: [
+      'Pusat Riset Terpadu',
+      'Perpustakaan Pusat',
+      'Asrama Kampus',
+      'Fasilitas Kesehatan',
+      'Area Kuliner',
+      'Transportasi Kampus',
+    ],
     imageUrl:
         'https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=720&q=80',
+    isFavorite: true,
   ),
   University(
     id: 4,
-    name: 'Universitas Muhammadiyah Palembang',
-    location: 'Palembang, Sumatera Selatan',
-    speciality: 'Unggul & Islami – Kesehatan & Teknik',
+    name: 'Institut Pertanian Bogor',
+    location: 'Bogor, Jawa Barat',
+    speciality: 'Agrokompleks dan lingkungan',
     description:
-        'Universitas Muhammadiyah Palembang (UMP) adalah universitas swasta besar di Sumsel dengan slogan “Unggul & Islami”, memiliki berbagai program studi termasuk kesehatan dan teknik.',
+        'Institut Pertanian Bogor adalah perguruan tinggi unggulan di bidang pertanian, agrokompleks, dan lingkungan. Kampus ini memiliki keahlian khusus dalam pengembangan teknologi pertanian dan pelestarian lingkungan.',
+    faculties: [
+      'Fakultas Pertanian',
+      'Fakultas Peternakan',
+      'Fakultas Perikanan',
+      'Fakultas Kehutanan',
+    ],
+    programs: [
+      'Agroteknologi',
+      'Peternakan',
+      'Perikanan',
+      'Kehutanan',
+      'Teknologi Pangan',
+    ],
+    facilities: [
+      'Lahan Percobaan',
+      'Laboratorium Pertanian',
+      'Kandang Hewan',
+      'Kolam Ikan',
+      'Kantin Organik',
+      'Greenhouse',
+    ],
     imageUrl:
         'https://images.unsplash.com/photo-1533228100845-08145b01de14?auto=format&fit=crop&w=720&q=80',
   ),
   University(
     id: 5,
-    name: 'Universitas Sumatera Selatan',
-    location: 'Palembang, Sumatera Selatan',
-    speciality: 'Sains, Teknologi & Humaniora relevan zaman',
+    name: 'Universitas Airlangga',
+    location: 'Surabaya, Jawa Timur',
+    speciality: 'Kesehatan & bisnis kompetitif',
     description:
-        'Universitas Sumatera Selatan (USS) berdiri pada tahun 2019 di Palembang, fokus pada pendidikan tinggi yang berkualitas di bidang sains, teknologi, dan humaniora.',
+        'Universitas Airlangga adalah universitas negeri yang unggul di bidang kesehatan dan bisnis. Kampus ini memiliki fakultas kedokteran dan manajemen yang sangat kompetitif dengan program studi yang relevan dengan kebutuhan industri.',
+    faculties: [
+      'Fakultas Kedokteran',
+      'Fakultas Ekonomi dan Bisnis',
+      'Fakultas Hukum',
+      'Fakultas Kesehatan Masyarakat',
+    ],
+    programs: [
+      'Kedokteran',
+      'Manajemen',
+      'Hukum',
+      'Kesehatan Masyarakat',
+      'Farmasi',
+    ],
+    facilities: [
+      'Rumah Sakit Pendidikan',
+      'Perpustakaan Medis',
+      'Laboratorium Klinik',
+      'Auditorium',
+      'Kantin Kesehatan',
+      'Parkir Luas',
+    ],
     imageUrl:
         'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=720&q=80',
   ),
+  University(
+    id: 6,
+    name: 'Binus University',
+    location: 'Jakarta, DKI Jakarta',
+    speciality: 'Teknologi & bisnis modern',
+    description:
+        'Binus University adalah universitas swasta terkemuka yang fokus pada teknologi dan bisnis modern. Kampus ini dikenal dengan program studi teknologi informasi dan manajemen bisnis yang mengikuti perkembangan zaman.',
+    faculties: [
+      'Fakultas Ilmu Komputer',
+      'Fakultas Ekonomi dan Komunikasi',
+      'School of Design',
+      'Fakultas Teknik',
+    ],
+    programs: [
+      'Teknik Informatika',
+      'Sistem Informasi',
+      'Manajemen',
+      'Desain Komunikasi Visual',
+      'Teknik Industri',
+    ],
+    facilities: [
+      'Lab Komputer Modern',
+      'Studio Desain',
+      'Coworking Space',
+      'Kantin Modern',
+      'Area Parkir',
+      'Fasilitas Digital',
+    ],
+    imageUrl:
+        'https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=720&q=80',
+  ),
 ];
+

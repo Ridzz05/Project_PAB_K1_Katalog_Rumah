@@ -57,6 +57,69 @@ flutter pub get
 flutter run
 ```
 
+## Build Release
+
+### Persiapan Release
+
+Proyek sudah dikonfigurasi untuk build release. Sebelum build, pastikan:
+
+1. **Update version** di `pubspec.yaml` jika diperlukan:
+   ```yaml
+   version: 1.0.0+1  # Format: major.minor.patch+buildNumber
+   ```
+
+2. **App Label** sudah diatur di `AndroidManifest.xml` sebagai "UniFinder"
+
+3. **ProGuard Rules** sudah disiapkan di `android/app/proguard-rules.pro`
+
+### Build APK Release
+
+```bash
+# Build APK untuk release
+flutter build apk --release
+
+# Build APK split per ABI (lebih kecil ukurannya)
+flutter build apk --split-per-abi --release
+```
+
+### Build App Bundle (AAB) untuk Google Play Store
+
+```bash
+flutter build appbundle --release
+```
+
+File output akan berada di:
+- APK: `build/app/outputs/flutter-apk/app-release.apk`
+- AAB: `build/app/outputs/bundle/release/app-release.aab`
+
+### Catatan Penting
+
+⚠️ **Signing Configuration**: Saat ini menggunakan debug signing. Untuk production:
+
+1. Buat keystore file:
+   ```bash
+   keytool -genkey -v -keystore ~/upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+   ```
+
+2. Buat file `android/key.properties`:
+   ```properties
+   storePassword=<password>
+   keyPassword=<password>
+   keyAlias=upload
+   storeFile=<path-to-keystore>
+   ```
+
+3. Update `android/app/build.gradle.kts` untuk menggunakan keystore tersebut.
+
+### Optimasi Release
+
+Proyek sudah dikonfigurasi dengan:
+- ✅ **Minification** enabled
+- ✅ **Resource Shrinking** enabled  
+- ✅ **ProGuard Rules** untuk optimasi dan obfuscation
+- ✅ **Debug banner** disabled
+- ✅ **Cleartext traffic** disabled untuk keamanan
+
 ## Tujuan Pembelajaran
 
 Proyek ini bertujuan untuk:

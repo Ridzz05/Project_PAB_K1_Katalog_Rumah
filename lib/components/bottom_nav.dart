@@ -36,9 +36,9 @@ class BottomNavScreen extends StatelessWidget {
             child: Theme(
               data: Theme.of(context).copyWith(
                 navigationBarTheme: NavigationBarThemeData(
-                  labelTextStyle: MaterialStateProperty.resolveWith<TextStyle?>(
-                    (Set<MaterialState> states) {
-                      if (states.contains(MaterialState.selected)) {
+                  labelTextStyle: WidgetStateProperty.resolveWith<TextStyle?>(
+                    (Set<WidgetState> states) {
+                      if (states.contains(WidgetState.selected)) {
                         return const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w500,

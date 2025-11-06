@@ -1,11 +1,10 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'auth/auth.dart';
 import 'components/bottom_nav.dart';
 import 'data/data_universitas.dart';
+import 'screens/detail_screens.dart';
 import 'screens/profile_screens.dart';
 
 void main() {
@@ -34,7 +33,7 @@ class _MyAppState extends State<MyApp> {
       controller: _authController,
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Katalog Rumah',
+        title: 'UniFinder',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
             seedColor: const Color(0xFFFF7643),
@@ -197,7 +196,7 @@ class _AppShellState extends State<AppShell> {
   }
 }
 
-class HomeTab extends StatefulWidget {
+class HomeTab extends StatelessWidget {
   const HomeTab({
     super.key,
     required this.universities,
@@ -210,175 +209,40 @@ class HomeTab extends StatefulWidget {
   final ValueChanged<University> onToggleFavorite;
 
   @override
-  State<HomeTab> createState() => _HomeTabState();
-}
-
-class _HomeTabState extends State<HomeTab> {
-  bool _useGrid = false;
-
-  void _toggleLayout() {
-    setState(() => _useGrid = !_useGrid);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final universities = widget.universities;
     return SafeArea(
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Expanded(
-                  child: _SectionHeader(
-                    title: 'Daftar Rumah',
-                    subtitle:
-                        'Lihat ringkasan hunian pilihan sebelum membuka detailnya.',
-                  ),
+      child: ListView.separated(
+        padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+        itemCount: universities.length + 1,
+        separatorBuilder: (_, __) => const SizedBox(height: 16),
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return const _SectionHeader(
+              title: 'Daftar Rumah',
+              subtitle:
+                  'Lihat ringkasan hunian pilihan sebelum membuka detailnya.',
+            );
+          }
+
+          final university = universities[index - 1];
+          final isFavorite = favoriteIds.contains(university.id);
+          return UniversityTile(
+            university: university,
+            isFavorite: isFavorite,
+            onToggleFavorite: () => onToggleFavorite(university),
+            showFavoriteButton: false,
+            showPreviewDetails: false,
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => UniversityDetailScreen(
+                  university: university,
+                  isFavorite: isFavorite,
+                  onToggleFavorite: () => onToggleFavorite(university),
                 ),
-                const SizedBox(width: 12),
-                _LayoutToggleButton(isGrid: _useGrid, onPressed: _toggleLayout),
-              ],
-            ),
-          ),
-          const SizedBox(height: 4),
-          Expanded(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 250),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              child: _useGrid
-                  ? _HomeGridView(
-                      key: const ValueKey('home-grid'),
-                      universities: universities,
-                      favoriteIds: widget.favoriteIds,
-                      onToggleFavorite: widget.onToggleFavorite,
-                    )
-                  : _HomeListView(
-                      key: const ValueKey('home-list'),
-                      universities: universities,
-                      favoriteIds: widget.favoriteIds,
-                      onToggleFavorite: widget.onToggleFavorite,
-                    ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _HomeListView extends StatelessWidget {
-  const _HomeListView({
-    super.key,
-    required this.universities,
-    required this.favoriteIds,
-    required this.onToggleFavorite,
-  });
-
-  final List<University> universities;
-  final Set<int> favoriteIds;
-  final ValueChanged<University> onToggleFavorite;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-      physics: const BouncingScrollPhysics(),
-      itemCount: universities.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 16),
-      itemBuilder: (context, index) {
-        final university = universities[index];
-        final isFavorite = favoriteIds.contains(university.id);
-        return UniversityTile(
-          university: university,
-          isFavorite: isFavorite,
-          onToggleFavorite: () => onToggleFavorite(university),
-          showFavoriteButton: false,
-          showPreviewDetails: false,
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => UniversityDetailScreen(
-                university: university,
-                isFavorite: isFavorite,
-                onToggleFavorite: () => onToggleFavorite(university),
               ),
             ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _HomeGridView extends StatelessWidget {
-  const _HomeGridView({
-    super.key,
-    required this.universities,
-    required this.favoriteIds,
-    required this.onToggleFavorite,
-  });
-
-  final List<University> universities;
-  final Set<int> favoriteIds;
-  final ValueChanged<University> onToggleFavorite;
-
-  @override
-  Widget build(BuildContext context) {
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-      physics: const BouncingScrollPhysics(),
-      itemCount: universities.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        childAspectRatio: 1,
-      ),
-      itemBuilder: (context, index) {
-        final university = universities[index];
-        final isFavorite = favoriteIds.contains(university.id);
-        return UniversityGridCard(
-          university: university,
-          isFavorite: isFavorite,
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => UniversityDetailScreen(
-                university: university,
-                isFavorite: isFavorite,
-                onToggleFavorite: () => onToggleFavorite(university),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _LayoutToggleButton extends StatelessWidget {
-  const _LayoutToggleButton({required this.isGrid, required this.onPressed});
-
-  final bool isGrid;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final icon = isGrid ? Icons.view_agenda_rounded : Icons.grid_view_rounded;
-    final tooltip = isGrid ? 'Tampilkan daftar' : 'Tampilkan grid';
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
-      ),
-      child: IconButton(
-        onPressed: onPressed,
-        icon: Icon(icon, size: 20),
-        color: const Color(0xFF757575),
-        tooltip: tooltip,
+          );
+        },
       ),
     );
   }
@@ -658,8 +522,6 @@ class UniversityTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final imageProvider = _imageProviderFor(university);
     return Material(
       color: Colors.white,
       shape: RoundedRectangleBorder(
@@ -675,8 +537,8 @@ class UniversityTile extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image(
-                  image: imageProvider,
+                child: Image.network(
+                  university.imageUrl,
                   width: 56,
                   height: 56,
                   fit: BoxFit.cover,
@@ -700,34 +562,43 @@ class UniversityTile extends StatelessWidget {
                   children: [
                     Text(
                       university.name,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF1F1F1F),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1F1F1F),
+                        height: 1.3,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     if (showPreviewDetails)
                       Text(
                         university.location,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: const Color(0xFF7A7A7A),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF7A7A7A),
+                          height: 1.4,
                         ),
                       )
                     else
                       Text(
                         'lihat detail lengkap',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: const Color(0xFF7A7A7A),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF7A7A7A),
+                          height: 1.4,
                         ),
                       ),
                     if (showPreviewDetails &&
                         university.speciality.isNotEmpty) ...[
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 6),
                       Text(
                         university.speciality,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: const Color(0xFFFF7643),
-                          fontWeight: FontWeight.w500,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFFFF7643),
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
@@ -763,317 +634,6 @@ class UniversityTile extends StatelessWidget {
   }
 }
 
-class UniversityGridCard extends StatelessWidget {
-  const UniversityGridCard({
-    super.key,
-    required this.university,
-    required this.isFavorite,
-    required this.onTap,
-  });
-
-  final University university;
-  final bool isFavorite;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final imageProvider = _imageProviderFor(university);
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE9E9E9)),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: Image(
-                    image: imageProvider,
-                    fit: BoxFit.cover,
-                    filterQuality: FilterQuality.medium,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      color: const Color(0xFFF0F0F0),
-                      alignment: Alignment.center,
-                      child: const Icon(
-                        Icons.school_outlined,
-                        color: Color(0xFFB6B6B6),
-                        size: 32,
-                      ),
-                    ),
-                  ),
-                ),
-                if (isFavorite)
-                  Positioned(
-                    top: 10,
-                    right: 10,
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: const Color(0x59000000),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.favorite,
-                        size: 16,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(16),
-                      bottomRight: Radius.circular(16),
-                    ),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                      child: Container(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                        decoration: const BoxDecoration(
-                          color: Color(0x80FFFFFF),
-                          border: Border(
-                            top: BorderSide(
-                              color: Color(0x66FFFFFF),
-                              width: 0.75,
-                            ),
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              university.name,
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF1F1F1F),
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'lihat detail lengkap',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: const Color(0xFF555555),
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class UniversityDetailScreen extends StatelessWidget {
-  const UniversityDetailScreen({
-    super.key,
-    required this.university,
-    required this.isFavorite,
-    required this.onToggleFavorite,
-  });
-
-  final University university;
-  final bool isFavorite;
-  final VoidCallback onToggleFavorite;
-
-  @override
-  Widget build(BuildContext context) {
-    final otherUniversities = demoUniversities
-        .where((uni) => uni.id != university.id)
-        .take(3)
-        .toList();
-
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 280,
-            pinned: true,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            flexibleSpace: FlexibleSpaceBar(
-              background: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Image(
-                    image: _imageProviderFor(university),
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      color: const Color(0xFFF0F0F0),
-                      child: const Icon(
-                        Icons.school_outlined,
-                        size: 100,
-                        color: Color(0xFFB6B6B6),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Colors.transparent, const Color(0x4D000000)],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              IconButton(
-                icon: Icon(
-                  isFavorite ? Icons.favorite : Icons.favorite_border,
-                  color: Colors.white,
-                ),
-                onPressed: onToggleFavorite,
-              ),
-            ],
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    university.name,
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1F1F1F),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.location_on,
-                        size: 18,
-                        color: Color(0xFF7A7A7A),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        university.location,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Color(0xFF7A7A7A),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (university.speciality.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0x1AFF7643),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        university.speciality,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFFFF7643),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Deskripsi',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF1F1F1F),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    university.description.isNotEmpty
-                        ? university.description
-                        : 'Tidak ada deskripsi tersedia untuk hunian ini.',
-                    style: const TextStyle(
-                      fontSize: 15,
-                      color: Color(0xFF4A4A4A),
-                      height: 1.6,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  const Text(
-                    'Rumah Lainnya',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF1F1F1F),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  ...otherUniversities.map(
-                    (otherUni) => Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: UniversityTile(
-                        university: otherUni,
-                        isFavorite: false,
-                        onToggleFavorite: () {},
-                        showFavoriteButton: false,
-                        showPreviewDetails: false,
-                        onTap: () {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (_) => UniversityDetailScreen(
-                                university: otherUni,
-                                isFavorite: false,
-                                onToggleFavorite: () {},
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-ImageProvider<Object> _imageProviderFor(University university) {
-  if (university.isAsset) {
-    return AssetImage(university.imageUrl);
-  }
-  return NetworkImage(university.imageUrl);
-}
 
 const String searchIcon =
     '''<svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg">

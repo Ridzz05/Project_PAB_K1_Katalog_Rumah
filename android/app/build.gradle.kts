@@ -48,3 +48,8 @@ android {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // Required when R8 minification runs and Flutter references Play Store deferred components
+    implementation("com.google.android.play:core:1.10.3")
+}

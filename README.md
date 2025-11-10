@@ -135,3 +135,11 @@ Proyek ini bertujuan untuk:
 **Yonathan Rinfi**<br>
 **Daniel Linpa Ganata**
 # PAB_Wisata_Candi
+
+
+#TO DO: 
+- Menambahkan Fitur Share Detail Universitas
+- Menambahkan State Action Untuk Ke External URL
+- Add CP Button
+- Add Grid View Detail Instead Of Using List Grid
+- Add More Features On It Later

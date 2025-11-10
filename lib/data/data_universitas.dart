@@ -54,7 +54,6 @@ const List<University> demoUniversities = [
       'Ruang Inkubasi Startup Mahasiswa',
     ],
     imageUrl: 'images/univ_preview/mdp.png',
-    isFavorite: true,
   ),
   University(
     id: 2,
@@ -115,7 +114,7 @@ const List<University> demoUniversities = [
       'Studio Multimedia',
       'Ruang Belajar Interaktif',
     ],
-    imageUrl: 'images/univ_preview/binadarma.png',
+    imageUrl: 'images/univ_preview/ubd.png',
   ),
   University(
     id: 4,
@@ -256,7 +255,7 @@ const List<University> demoUniversities = [
       'Kantin',
       'Gedung Serbaguna',
     ],
-    imageUrl: 'images/univ_preview/polsri.png',
+    imageUrl: 'images/univ_preview/polsri.jpg',
   ),
   University(
     id: 9,

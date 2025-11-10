@@ -107,7 +107,7 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   static const List<String> _titles = [
     'Beranda',
-    'Cari Rumah',
+    'Cari Universitas',
     'Favorit',
     'Profil',
   ];
@@ -219,7 +219,7 @@ class HomeTab extends StatelessWidget {
         itemBuilder: (context, index) {
           if (index == 0) {
             return const _SectionHeader(
-              title: 'Daftar Rumah',
+              title: 'Daftar Universitas',
               subtitle:
                   'Lihat ringkasan hunian pilihan sebelum membuka detailnya.',
             );
@@ -304,7 +304,7 @@ class SearchTab extends StatelessWidget {
                   minWidth: 0,
                   minHeight: 0,
                 ),
-                hintText: 'Cari rumah...',
+                hintText: 'Cari Universitas...',
                 hintStyle: const TextStyle(color: Color(0xFF9F9F9F)),
                 filled: true,
                 fillColor: const Color(0xFFF7F7F7),
@@ -399,7 +399,7 @@ class FavoritesTab extends StatelessWidget {
         itemBuilder: (context, index) {
           if (index == 0) {
             return const _SectionHeader(
-              title: 'Rumah Favorit',
+              title: 'Universitas Favorit',
               subtitle: 'Simpan daftar hunian yang ingin kamu pantau.',
             );
           }

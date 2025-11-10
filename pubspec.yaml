@@ -51,6 +51,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.3
 
 dependency_overrides:
   image_picker_android: ^0.8.12+13
@@ -95,3 +97,21 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Configure launcher icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: images/unifind.jpg
+  # Optional: for Android adaptive icons; uses a white background
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: images/unifind.jpg
+
+# Configure native splash screen
+flutter_native_splash:
+  color: "#ffffff"
+  image: images/unifind.jpg
+  fullscreen: true
+  android_12:
+    image: images/unifind.jpg
+    icon_background_color: "#ffffff"

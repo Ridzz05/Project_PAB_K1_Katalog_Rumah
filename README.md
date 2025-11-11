@@ -133,7 +133,8 @@ Proyek ini bertujuan untuk:
 © 2025 — Disusun oleh<br>
 **M. Rizki Algipari**<br>
 **Yonathan Rinfi**<br>
-**Daniel Linpa Ganata**
+**Daniel Linpa Ganata**<br>
+**Muhammad Ammar Shadiq**<br>
 # PAB_Wisata_Candi
 
 

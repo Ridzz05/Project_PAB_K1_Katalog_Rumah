@@ -110,11 +110,11 @@ class _AppShellState extends State<AppShell> {
     'Beranda',
     'Cari Universitas',
     'Favorit',
+    'Compare',
     'Profil',
   ];
 
   final Set<int> _favoriteIds = <int>{};
-  final Set<int> _compareIds = <int>{};
   late final TextEditingController _searchController;
   String _searchQuery = '';
   int _currentIndex = 0;
@@ -156,50 +156,14 @@ class _AppShellState extends State<AppShell> {
     });
   }
 
-  void _toggleCompare(University university) {
-    if (_compareIds.contains(university.id)) {
-      setState(() => _compareIds.remove(university.id));
-      return;
-    }
-
-    if (_compareIds.length >= 3) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Maksimal 3 universitas dapat dibandingkan.'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      return;
-    }
-
-    setState(() => _compareIds.add(university.id));
-  }
-
-  void _openCompare() {
-    final selected = demoUniversities
-        .where((uni) => _compareIds.contains(uni.id))
-        .toList(growable: false);
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) =>
-            CompareScreen(universities: selected, onRemove: _toggleCompare),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final auth = AuthScope.of(context);
-    final compareSelections = demoUniversities
-        .where((uni) => _compareIds.contains(uni.id))
-        .toList(growable: false);
     final tabs = <Widget>[
       HomeTab(
         universities: demoUniversities,
         favoriteIds: _favoriteIds,
         onToggleFavorite: _toggleFavorite,
-        compareIds: _compareIds,
-        onToggleCompare: _toggleCompare,
       ),
       SearchTab(
         universities: demoUniversities,
@@ -207,17 +171,14 @@ class _AppShellState extends State<AppShell> {
         onToggleFavorite: _toggleFavorite,
         controller: _searchController,
         query: _searchQuery,
-        compareIds: _compareIds,
-        onToggleCompare: _toggleCompare,
       ),
       FavoritesTab(
         favorites: demoUniversities
             .where((uni) => _favoriteIds.contains(uni.id))
             .toList(),
         onToggleFavorite: _toggleFavorite,
-        compareIds: _compareIds,
-        onToggleCompare: _toggleCompare,
       ),
+      CompareTab(universities: demoUniversities),
       ProfileScreen(
         onLogout: widget.onLogout,
         userName: auth.userName,
@@ -231,24 +192,9 @@ class _AppShellState extends State<AppShell> {
       backgroundColor: Colors.white,
       appBar: AppBar(title: Text(_titles[_currentIndex])),
       body: IndexedStack(index: _currentIndex, children: tabs),
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 250),
-            child: compareSelections.isEmpty
-                ? const SizedBox.shrink()
-                : Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                    child: _CompareBar(
-                      selections: compareSelections,
-                      onCompare: _openCompare,
-                      onRemove: _toggleCompare,
-                    ),
-                  ),
-          ),
-          BottomNavScreen(currentIndex: _currentIndex, onTap: _handleTabSelect),
-        ],
+      bottomNavigationBar: BottomNavScreen(
+        currentIndex: _currentIndex,
+        onTap: _handleTabSelect,
       ),
     );
   }
@@ -260,15 +206,11 @@ class HomeTab extends StatelessWidget {
     required this.universities,
     required this.favoriteIds,
     required this.onToggleFavorite,
-    required this.compareIds,
-    required this.onToggleCompare,
   });
 
   final List<University> universities;
   final Set<int> favoriteIds;
   final ValueChanged<University> onToggleFavorite;
-  final Set<int> compareIds;
-  final ValueChanged<University> onToggleCompare;
 
   @override
   Widget build(BuildContext context) {
@@ -288,13 +230,10 @@ class HomeTab extends StatelessWidget {
 
           final university = universities[index - 1];
           final isFavorite = favoriteIds.contains(university.id);
-          final isCompared = compareIds.contains(university.id);
           return UniversityTile(
             university: university,
             isFavorite: isFavorite,
             onToggleFavorite: () => onToggleFavorite(university),
-            isCompared: isCompared,
-            onToggleCompare: () => onToggleCompare(university),
             showFavoriteButton: false,
             showPreviewDetails: false,
             onTap: () => Navigator.of(context).push(
@@ -302,9 +241,7 @@ class HomeTab extends StatelessWidget {
                 builder: (_) => UniversityDetailScreen(
                   university: university,
                   isFavorite: isFavorite,
-                  isCompared: isCompared,
                   onToggleFavorite: () => onToggleFavorite(university),
-                  onToggleCompare: () => onToggleCompare(university),
                 ),
               ),
             ),
@@ -323,8 +260,6 @@ class SearchTab extends StatelessWidget {
     required this.onToggleFavorite,
     required this.controller,
     required this.query,
-    required this.compareIds,
-    required this.onToggleCompare,
   });
 
   final List<University> universities;
@@ -332,8 +267,6 @@ class SearchTab extends StatelessWidget {
   final ValueChanged<University> onToggleFavorite;
   final TextEditingController controller;
   final String query;
-  final Set<int> compareIds;
-  final ValueChanged<University> onToggleCompare;
 
   @override
   Widget build(BuildContext context) {
@@ -414,13 +347,10 @@ class SearchTab extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final university = results[index];
                       final isFavorite = favoriteIds.contains(university.id);
-                      final isCompared = compareIds.contains(university.id);
                       return UniversityTile(
                         university: university,
                         isFavorite: isFavorite,
                         onToggleFavorite: () => onToggleFavorite(university),
-                        isCompared: isCompared,
-                        onToggleCompare: () => onToggleCompare(university),
                         showFavoriteButton: false,
                         showPreviewDetails: false,
                         onTap: () => Navigator.of(context).push(
@@ -428,11 +358,8 @@ class SearchTab extends StatelessWidget {
                             builder: (_) => UniversityDetailScreen(
                               university: university,
                               isFavorite: isFavorite,
-                              isCompared: isCompared,
                               onToggleFavorite: () =>
                                   onToggleFavorite(university),
-                              onToggleCompare: () =>
-                                  onToggleCompare(university),
                             ),
                           ),
                         ),
@@ -451,14 +378,10 @@ class FavoritesTab extends StatelessWidget {
     super.key,
     required this.favorites,
     required this.onToggleFavorite,
-    required this.compareIds,
-    required this.onToggleCompare,
   });
 
   final List<University> favorites;
   final ValueChanged<University> onToggleFavorite;
-  final Set<int> compareIds;
-  final ValueChanged<University> onToggleCompare;
 
   @override
   Widget build(BuildContext context) {
@@ -485,22 +408,17 @@ class FavoritesTab extends StatelessWidget {
           }
 
           final university = favorites[index - 1];
-          final isCompared = compareIds.contains(university.id);
           return UniversityTile(
             university: university,
             isFavorite: true,
             onToggleFavorite: () => onToggleFavorite(university),
-            isCompared: isCompared,
-            onToggleCompare: () => onToggleCompare(university),
             showPreviewDetails: false,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => UniversityDetailScreen(
                   university: university,
                   isFavorite: true,
-                  isCompared: isCompared,
                   onToggleFavorite: () => onToggleFavorite(university),
-                  onToggleCompare: () => onToggleCompare(university),
                 ),
               ),
             ),
@@ -508,6 +426,17 @@ class FavoritesTab extends StatelessWidget {
         },
       ),
     );
+  }
+}
+
+class CompareTab extends StatelessWidget {
+  const CompareTab({super.key, required this.universities});
+
+  final List<University> universities;
+
+  @override
+  Widget build(BuildContext context) {
+    return CompareScreen(universities: universities, showAppBar: false);
   }
 }
 
@@ -596,22 +525,16 @@ class UniversityTile extends StatelessWidget {
     required this.university,
     required this.isFavorite,
     required this.onToggleFavorite,
-    required this.isCompared,
-    required this.onToggleCompare,
     this.onTap,
     this.showFavoriteButton = true,
-    this.showCompareButton = true,
     this.showPreviewDetails = true,
   });
 
   final University university;
   final bool isFavorite;
-  final bool isCompared;
   final VoidCallback onToggleFavorite;
-  final VoidCallback onToggleCompare;
   final VoidCallback? onTap;
   final bool showFavoriteButton;
-  final bool showCompareButton;
   final bool showPreviewDetails;
 
   @override
@@ -704,18 +627,6 @@ class UniversityTile extends StatelessWidget {
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (showCompareButton)
-                    IconButton(
-                      onPressed: onToggleCompare,
-                      iconSize: 22,
-                      splashRadius: 20,
-                      icon: Icon(
-                        Icons.compare_arrows,
-                        color: isCompared
-                            ? const Color(0xFFFF7643)
-                            : const Color(0xFFB6B6B6),
-                      ),
-                    ),
                   if (showFavoriteButton)
                     IconButton(
                       onPressed: onToggleFavorite,
@@ -739,132 +650,6 @@ class UniversityTile extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CompareBar extends StatelessWidget {
-  const _CompareBar({
-    required this.selections,
-    required this.onCompare,
-    required this.onRemove,
-  });
-
-  final List<University> selections;
-  final VoidCallback onCompare;
-  final ValueChanged<University> onRemove;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      elevation: 6,
-      borderRadius: BorderRadius.circular(16),
-      shadowColor: const Color(0x22000000),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFE9E9E9)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0x1AFF7643),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.compare_arrows,
-                        color: Color(0xFFFF7643),
-                        size: 18,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        '${selections.length} dipilih',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFFFF7643),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Spacer(),
-                TextButton(
-                  onPressed: selections.isEmpty
-                      ? null
-                      : () {
-                          for (final uni in List<University>.from(selections)) {
-                            onRemove(uni);
-                          }
-                        },
-                  child: const Text('Reset'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: selections
-                    .map(
-                      (uni) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: ActionChip(
-                          label: Text(
-                            uni.name,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          onPressed: () => onRemove(uni),
-                          avatar: const Icon(
-                            Icons.close,
-                            size: 18,
-                            color: Color(0xFF6D6D6D),
-                          ),
-                          backgroundColor: const Color(0xFFF7F7F7),
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: onCompare,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF7643),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 14,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
-                ),
-                icon: const Icon(Icons.playlist_add_check),
-                label: const Text(
-                  'Bandingkan Sekarang',
-                  style: TextStyle(fontWeight: FontWeight.w700),
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );

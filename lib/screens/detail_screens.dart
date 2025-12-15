@@ -8,15 +8,11 @@ class UniversityDetailScreen extends StatefulWidget {
     required this.university,
     required this.isFavorite,
     required this.onToggleFavorite,
-    required this.isCompared,
-    required this.onToggleCompare,
   });
 
   final University university;
   final bool isFavorite;
-  final bool isCompared;
   final VoidCallback onToggleFavorite;
-  final VoidCallback onToggleCompare;
 
   @override
   State<UniversityDetailScreen> createState() => _UniversityDetailScreenState();
@@ -24,14 +20,12 @@ class UniversityDetailScreen extends StatefulWidget {
 
 class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
   late bool _isFavorite;
-  late bool _isCompared;
   bool _showSuccessAlert = false;
 
   @override
   void initState() {
     super.initState();
     _isFavorite = widget.isFavorite;
-    _isCompared = widget.isCompared;
   }
 
   void _handleToggleFavorite() {
@@ -52,15 +46,11 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
   }
 
   void _handleToggleCompare() {
-    setState(() {
-      _isCompared = !_isCompared;
-    });
-    widget.onToggleCompare();
-    final message = _isCompared
-        ? 'Ditambahkan ke daftar compare'
-        : 'Dihapus dari daftar compare';
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
+      const SnackBar(
+        content: Text('Gunakan tab Compare untuk membandingkan universitas.'),
+        duration: Duration(seconds: 2),
+      ),
     );
   }
 
@@ -360,16 +350,10 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                         child: OutlinedButton.icon(
                           onPressed: _handleToggleCompare,
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: _isCompared
-                                ? Colors.white
-                                : const Color(0xFFFF7643),
-                            backgroundColor: _isCompared
-                                ? const Color(0xFFFF7643)
-                                : Colors.white,
+                            foregroundColor: const Color(0xFFFF7643),
+                            backgroundColor: Colors.white,
                             side: BorderSide(
-                              color: _isCompared
-                                  ? const Color(0xFFFF7643)
-                                  : const Color(0xFFFF7643),
+                              color: const Color(0xFFFF7643),
                               width: 2,
                             ),
                             padding: const EdgeInsets.symmetric(vertical: 14),
@@ -380,12 +364,10 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                           icon: Icon(
                             Icons.compare_arrows,
                             size: 22,
-                            color: _isCompared ? Colors.white : null,
+                            color: const Color(0xFFFF7643),
                           ),
                           label: Text(
-                            _isCompared
-                                ? 'Hapus dari Compare'
-                                : 'Tambah ke Compare',
+                            'Buka tab Compare',
                             style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
@@ -410,9 +392,6 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                             university: otherUni,
                             isFavorite: false,
                             onToggleFavorite: () {},
-                            isCompared: false,
-                            onToggleCompare: () {},
-                            showCompareButton: false,
                             showFavoriteButton: false,
                             showPreviewDetails: false,
                             onTap: () {
@@ -421,9 +400,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                                   builder: (_) => UniversityDetailScreen(
                                     university: otherUni,
                                     isFavorite: false,
-                                    isCompared: false,
                                     onToggleFavorite: widget.onToggleFavorite,
-                                    onToggleCompare: widget.onToggleCompare,
                                   ),
                                 ),
                               );

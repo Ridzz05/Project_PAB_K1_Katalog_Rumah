@@ -36,22 +36,22 @@ class BottomNavScreen extends StatelessWidget {
             child: Theme(
               data: Theme.of(context).copyWith(
                 navigationBarTheme: NavigationBarThemeData(
-                  labelTextStyle: WidgetStateProperty.resolveWith<TextStyle?>(
-                    (Set<WidgetState> states) {
-                      if (states.contains(WidgetState.selected)) {
-                        return const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xFFFF7643),
-                        );
-                      }
+                  labelTextStyle: WidgetStateProperty.resolveWith<TextStyle?>((
+                    Set<WidgetState> states,
+                  ) {
+                    if (states.contains(WidgetState.selected)) {
                       return const TextStyle(
                         fontSize: 11,
-                        fontWeight: FontWeight.w400,
-                        color: inActiveIconColor,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFFFF7643),
                       );
-                    },
-                  ),
+                    }
+                    return const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w400,
+                      color: inActiveIconColor,
+                    );
+                  }),
                 ),
               ),
               child: NavigationBar(
@@ -123,6 +123,25 @@ class BottomNavScreen extends StatelessWidget {
                   ),
                   NavigationDestination(
                     icon: SvgPicture.string(
+                      compareIcon,
+                      colorFilter: const ColorFilter.mode(
+                        inActiveIconColor,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                    selectedIcon: _AnimatedActiveIcon(
+                      child: SvgPicture.string(
+                        compareIcon,
+                        colorFilter: const ColorFilter.mode(
+                          Color(0xFFFF7643),
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                    ),
+                    label: 'Compare',
+                  ),
+                  NavigationDestination(
+                    icon: SvgPicture.string(
                       userIcon,
                       colorFilter: const ColorFilter.mode(
                         inActiveIconColor,
@@ -191,6 +210,14 @@ const searchIcon =
 const favoriteIcon =
     '''<svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M19.1585 10.6702L11.2942 18.6186C11.1323 18.7822 10.8687 18.7822 10.7058 18.6186L2.84145 10.6702C1.81197 9.62861 1.2443 8.24408 1.2443 6.77039C1.2443 5.29671 1.81197 3.91218 2.84145 2.87063C3.90622 1.79552 5.30308 1.25744 6.70098 1.25744C8.09887 1.25744 9.49573 1.79552 10.5605 2.87063C10.8033 3.11607 11.1967 3.11607 11.4405 2.87063C13.568 0.720415 17.03 0.720415 19.1585 2.87063C20.188 3.91113 20.7557 5.29566 20.7557 6.77039C20.7557 8.24408 20.188 9.62966 19.1585 10.6702ZM20.0386 1.98013C17.5687 -0.516223 13.6313 -0.652578 11.0005 1.57316C8.36973 -0.652578 4.43342 -0.516223 1.96245 1.98013C0.696354 3.25977 0 4.96001 0 6.77039C0 8.57972 0.696354 10.281 1.96245 11.5607L9.82678 19.5091C10.1495 19.8364 10.575 20 11.0005 20C11.426 20 11.8505 19.8364 12.1743 19.5091L20.0386 11.5607C21.3036 10.2821 22 8.58077 22 6.77039C22 4.96001 21.3036 3.25872 20.0386 1.98013Z" fill="#B6B6B6"/>
+</svg>''';
+//icon compare
+const compareIcon =
+    '''<svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M5.5 14H4C2.34315 14 1 12.6569 1 11V4C1 2.34315 2.34315 1 4 1H11C12.6569 1 14 2.34315 14 4V5.5" stroke="#B6B6B6" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M16.5 6H18C19.6569 6 21 7.34315 21 9V16C21 17.6569 19.6569 19 18 19H11C9.34315 19 8 17.6569 8 16V14.5" stroke="#B6B6B6" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M5 6L9 10L13 6" stroke="#B6B6B6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M17 14L13 10L9 14" stroke="#B6B6B6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>''';
 //icon profile
 const userIcon =

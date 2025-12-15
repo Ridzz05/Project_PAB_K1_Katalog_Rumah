@@ -135,6 +135,7 @@ Proyek ini bertujuan untuk:
 **Yonathan Rinfi**<br>
 **Daniel Linpa Ganata**<br>
 **Muhammad Ammar Shadiq**<br>
+**Aldi Yonatan Rusnawan**<br>
 # PAB_Wisata_Candi
 
 

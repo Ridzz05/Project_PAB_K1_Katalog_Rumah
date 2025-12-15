@@ -8,11 +8,15 @@ class UniversityDetailScreen extends StatefulWidget {
     required this.university,
     required this.isFavorite,
     required this.onToggleFavorite,
+    required this.isCompared,
+    required this.onToggleCompare,
   });
 
   final University university;
   final bool isFavorite;
+  final bool isCompared;
   final VoidCallback onToggleFavorite;
+  final VoidCallback onToggleCompare;
 
   @override
   State<UniversityDetailScreen> createState() => _UniversityDetailScreenState();
@@ -20,12 +24,14 @@ class UniversityDetailScreen extends StatefulWidget {
 
 class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
   late bool _isFavorite;
+  late bool _isCompared;
   bool _showSuccessAlert = false;
 
   @override
   void initState() {
     super.initState();
     _isFavorite = widget.isFavorite;
+    _isCompared = widget.isCompared;
   }
 
   void _handleToggleFavorite() {
@@ -34,7 +40,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
       _showSuccessAlert = true;
     });
     widget.onToggleFavorite();
-    
+
     // Hide alert after 2 seconds
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
@@ -43,6 +49,19 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
         });
       }
     });
+  }
+
+  void _handleToggleCompare() {
+    setState(() {
+      _isCompared = !_isCompared;
+    });
+    widget.onToggleCompare();
+    final message = _isCompared
+        ? 'Ditambahkan ke daftar compare'
+        : 'Dihapus dari daftar compare';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
+    );
   }
 
   @override
@@ -270,26 +289,28 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
-                          children: widget.university.facilities.map(
-                            (facility) => Chip(
-                              label: Text(
-                                facility,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
+                          children: widget.university.facilities
+                              .map(
+                                (facility) => Chip(
+                                  label: Text(
+                                    facility,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  backgroundColor: const Color(0xFFF5F6F9),
+                                  side: BorderSide.none,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
                                 ),
-                              ),
-                              backgroundColor: const Color(0xFFF5F6F9),
-                              side: BorderSide.none,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                            ),
-                          ).toList(),
+                              )
+                              .toList(),
                         ),
                       ],
                       const SizedBox(height: 32),
@@ -333,6 +354,45 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: _handleToggleCompare,
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: _isCompared
+                                ? Colors.white
+                                : const Color(0xFFFF7643),
+                            backgroundColor: _isCompared
+                                ? const Color(0xFFFF7643)
+                                : Colors.white,
+                            side: BorderSide(
+                              color: _isCompared
+                                  ? const Color(0xFFFF7643)
+                                  : const Color(0xFFFF7643),
+                              width: 2,
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          icon: Icon(
+                            Icons.compare_arrows,
+                            size: 22,
+                            color: _isCompared ? Colors.white : null,
+                          ),
+                          label: Text(
+                            _isCompared
+                                ? 'Hapus dari Compare'
+                                : 'Tambah ke Compare',
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
                       const SizedBox(height: 32),
                       const Text(
                         'Universitas Lainnya',
@@ -350,6 +410,9 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                             university: otherUni,
                             isFavorite: false,
                             onToggleFavorite: () {},
+                            isCompared: false,
+                            onToggleCompare: () {},
+                            showCompareButton: false,
                             showFavoriteButton: false,
                             showPreviewDetails: false,
                             onTap: () {
@@ -358,7 +421,9 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                                   builder: (_) => UniversityDetailScreen(
                                     university: otherUni,
                                     isFavorite: false,
+                                    isCompared: false,
                                     onToggleFavorite: widget.onToggleFavorite,
+                                    onToggleCompare: widget.onToggleCompare,
                                   ),
                                 ),
                               );
@@ -393,10 +458,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
 }
 
 class _SuccessAlert extends StatefulWidget {
-  const _SuccessAlert({
-    required this.message,
-    required this.isFavorite,
-  });
+  const _SuccessAlert({required this.message, required this.isFavorite});
 
   final String message;
   final bool isFavorite;
@@ -418,12 +480,14 @@ class _SuccessAlertState extends State<_SuccessAlert>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
-    );
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
     _controller.forward();
   }
 
@@ -447,10 +511,7 @@ class _SuccessAlertState extends State<_SuccessAlert>
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: const Color(0xFFE0E0E0),
-                width: 1,
-              ),
+              border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
             ),
             child: Row(
               children: [
@@ -464,9 +525,7 @@ class _SuccessAlertState extends State<_SuccessAlert>
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    widget.isFavorite
-                        ? Icons.favorite
-                        : Icons.favorite_border,
+                    widget.isFavorite ? Icons.favorite : Icons.favorite_border,
                     color: widget.isFavorite
                         ? const Color(0xFFFF7643)
                         : const Color(0xFF9E9E9E),
@@ -492,4 +551,3 @@ class _SuccessAlertState extends State<_SuccessAlert>
     );
   }
 }
-

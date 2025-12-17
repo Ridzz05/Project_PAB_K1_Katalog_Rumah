@@ -7,6 +7,7 @@ import 'data/data_universitas.dart';
 import 'screens/compare_screen.dart';
 import 'screens/detail_screens.dart';
 import 'screens/profile_screens.dart';
+import 'screens/landing_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -64,6 +65,52 @@ class _MyAppState extends State<MyApp> {
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
+  Future<void> _openLogin(
+    BuildContext context,
+    AuthController auth,
+  ) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => AnimatedBuilder(
+          animation: auth,
+          builder: (context, _) {
+            if (auth.isAuthenticated && Navigator.of(context).canPop()) {
+              Future.microtask(() => Navigator.of(context).maybePop());
+            }
+            return SignInScreen(
+              key: const ValueKey('sign-in'),
+              onSubmit: auth.login,
+              isLoading: auth.isLoading,
+              onRegister: auth.register,
+              errorMessage: auth.errorMessage,
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openRegister(
+    BuildContext context,
+    AuthController auth,
+  ) async {
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => RegisterScreen(
+          onRegister: auth.register,
+        ),
+      ),
+    );
+
+    if (result == true && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Akun berhasil dibuat. Silakan masuk.'),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = AuthScope.of(context);
@@ -71,12 +118,11 @@ class AuthGate extends StatelessWidget {
       duration: const Duration(milliseconds: 250),
       child: auth.isAuthenticated
           ? AppShell(key: const ValueKey('app-shell'), onLogout: auth.logout)
-          : SignInScreen(
-              key: const ValueKey('sign-in'),
-              onSubmit: auth.login,
-              isLoading: auth.isLoading,
-              onRegister: auth.register,
-              errorMessage: auth.errorMessage,
+          : LandingScreen(
+              key: const ValueKey('landing'),
+              onStart: () => _openRegister(context, auth),
+              onLogin: () => _openLogin(context, auth),
+              onSignUp: () => _openRegister(context, auth),
             ),
     );
   }

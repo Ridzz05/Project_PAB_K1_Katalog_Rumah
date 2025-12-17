@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../auth/auth_scope.dart';
 import '../components/bottom_nav.dart';
@@ -28,18 +29,55 @@ class _AppShellState extends State<AppShell> {
   ];
 
   final Set<int> _favoriteIds = <int>{};
+  final List<String> _specialities = demoUniversities
+      .where((u) => u.speciality.isNotEmpty)
+      .map((u) => u.speciality)
+      .toSet()
+      .toList()
+    ..sort();
+  final List<String> _sortOptions = const [
+    'A-Z',
+    'Z-A',
+    'Favorit dulu',
+    'Spesialis unggulan',
+  ];
   late final TextEditingController _searchController;
   String _searchQuery = '';
+  String _selectedSpeciality = 'Semua';
+  String _sortOption = 'A-Z';
   int _currentIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _favoriteIds.addAll(
-      demoUniversities.where((uni) => uni.isFavorite).map((uni) => uni.id),
-    );
     _searchController = TextEditingController();
     _searchController.addListener(_handleSearchChange);
+    _loadFavorites();
+  }
+
+  Future<void> _loadFavorites() async {
+    final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getStringList('favorite_ids');
+    if (stored != null) {
+      _favoriteIds
+        ..clear()
+        ..addAll(stored.map(int.parse));
+    } else {
+      _favoriteIds.addAll(
+        demoUniversities.where((uni) => uni.isFavorite).map((uni) => uni.id),
+      );
+    }
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> _persistFavorites() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(
+      'favorite_ids',
+      _favoriteIds.map((id) => id.toString()).toList(),
+    );
   }
 
   @override
@@ -67,11 +105,54 @@ class _AppShellState extends State<AppShell> {
         _favoriteIds.add(university.id);
       }
     });
+    _persistFavorites();
+  }
+
+  List<University> _applySearchAndFilter() {
+    final lowerQuery = _searchQuery.toLowerCase();
+    List<University> results = demoUniversities.where((uni) {
+      final matchesQuery = lowerQuery.isEmpty ||
+          uni.name.toLowerCase().contains(lowerQuery) ||
+          uni.location.toLowerCase().contains(lowerQuery);
+      final matchesSpeciality = _selectedSpeciality == 'Semua' ||
+          uni.speciality.toLowerCase() ==
+              _selectedSpeciality.toLowerCase();
+      return matchesQuery && matchesSpeciality;
+    }).toList();
+
+    switch (_sortOption) {
+      case 'Z-A':
+        results.sort((a, b) => b.name.compareTo(a.name));
+        break;
+      case 'Favorit dulu':
+        results.sort((a, b) {
+          final aFav = _favoriteIds.contains(a.id) ? 1 : 0;
+          final bFav = _favoriteIds.contains(b.id) ? 1 : 0;
+          if (aFav != bFav) return bFav.compareTo(aFav);
+          return a.name.compareTo(b.name);
+        });
+        break;
+      case 'Spesialis unggulan':
+        results.sort((a, b) {
+          final aHas = a.speciality.isNotEmpty ? 1 : 0;
+          final bHas = b.speciality.isNotEmpty ? 1 : 0;
+          if (aHas != bHas) return bHas.compareTo(aHas);
+          return a.name.compareTo(b.name);
+        });
+        break;
+      case 'A-Z':
+      default:
+        results.sort((a, b) => a.name.compareTo(b.name));
+        break;
+    }
+
+    return results;
   }
 
   @override
   Widget build(BuildContext context) {
     final auth = AuthScope.of(context);
+    final specialityFilters = ['Semua', ..._specialities];
     final tabs = <Widget>[
       HomeTab(
         universities: demoUniversities,
@@ -79,11 +160,21 @@ class _AppShellState extends State<AppShell> {
         onToggleFavorite: _toggleFavorite,
       ),
       SearchTab(
-        universities: demoUniversities,
+        universities: _applySearchAndFilter(),
         favoriteIds: _favoriteIds,
         onToggleFavorite: _toggleFavorite,
         controller: _searchController,
         query: _searchQuery,
+        specialities: specialityFilters,
+        selectedSpeciality: _selectedSpeciality,
+        onSpecialitySelected: (value) {
+          setState(() => _selectedSpeciality = value);
+        },
+        sortOptions: _sortOptions,
+        selectedSort: _sortOption,
+        onSortChanged: (value) {
+          setState(() => _sortOption = value);
+        },
       ),
       FavoritesTab(
         favorites: demoUniversities
@@ -173,6 +264,12 @@ class SearchTab extends StatelessWidget {
     required this.onToggleFavorite,
     required this.controller,
     required this.query,
+    required this.specialities,
+    required this.selectedSpeciality,
+    required this.onSpecialitySelected,
+    required this.sortOptions,
+    required this.selectedSort,
+    required this.onSortChanged,
   });
 
   final List<University> universities;
@@ -180,20 +277,18 @@ class SearchTab extends StatelessWidget {
   final ValueChanged<University> onToggleFavorite;
   final TextEditingController controller;
   final String query;
+  final List<String> specialities;
+  final String selectedSpeciality;
+  final ValueChanged<String> onSpecialitySelected;
+  final List<String> sortOptions;
+  final String selectedSort;
+  final ValueChanged<String> onSortChanged;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final lowerQuery = query.toLowerCase();
-    final results = lowerQuery.isEmpty
-        ? universities
-        : universities
-            .where(
-              (uni) =>
-                  uni.name.toLowerCase().contains(lowerQuery) ||
-                  uni.location.toLowerCase().contains(lowerQuery),
-            )
-            .toList();
+    final results = universities;
 
     return SafeArea(
       child: Column(
@@ -235,7 +330,73 @@ class SearchTab extends StatelessWidget {
               ),
             ),
           ),
-          if (lowerQuery.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: 40,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: specialities.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                    itemBuilder: (_, index) {
+                      final item = specialities[index];
+                      final isSelected = item == selectedSpeciality;
+                      return ChoiceChip(
+                        label: Text(item),
+                        selected: isSelected,
+                        selectedColor:
+                            const Color(0xFFFF7643).withValues(alpha: 0.16),
+                        backgroundColor: const Color(0xFFF3F3F3),
+                        labelStyle: TextStyle(
+                          color: isSelected
+                              ? const Color(0xFFFF7643)
+                              : const Color(0xFF5A5A5A),
+                          fontWeight:
+                              isSelected ? FontWeight.w700 : FontWeight.w500,
+                        ),
+                        onSelected: (_) => onSpecialitySelected(item),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    const Text(
+                      'Urutkan:',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF3A3A3A),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    DropdownButton<String>(
+                      value: selectedSort,
+                      underline: const SizedBox.shrink(),
+                      borderRadius: BorderRadius.circular(12),
+                      icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                      items: sortOptions
+                          .map(
+                            (option) => DropdownMenuItem<String>(
+                              value: option,
+                              child: Text(option),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (val) {
+                        if (val != null) onSortChanged(val);
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          if (lowerQuery.isNotEmpty || selectedSpeciality != 'Semua')
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(

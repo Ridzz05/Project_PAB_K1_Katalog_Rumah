@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,6 +11,13 @@ import '../data/data_universitas.dart';
 import 'compare_screen.dart';
 import 'detail_screens.dart';
 import 'profile_screens.dart';
+
+const _brandColor = Color(0xFFFF7643);
+const _bgColors = [
+  Color(0xFF0E0C24),
+  Color(0xFF0F1F37),
+  Color(0xFF1C2448),
+];
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key, required this.onLogout});
@@ -193,9 +202,34 @@ class _AppShellState extends State<AppShell> {
     ];
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(title: Text(_titles[_currentIndex])),
-      body: IndexedStack(index: _currentIndex, children: tabs),
+      backgroundColor: Colors.transparent,
+      extendBody: true,
+      extendBodyBehindAppBar: true,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(88),
+        child: SafeArea(
+          bottom: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
+            child: _GlassTopBar(
+              title: _titles[_currentIndex],
+              subtitle: null,
+              badgeText: '${_favoriteIds.length} Favorit',
+              useBlur: _currentIndex != 3, // no blur on Compare tab
+            ),
+          ),
+        ),
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: _bgColors,
+          ),
+        ),
+        child: IndexedStack(index: _currentIndex, children: tabs),
+      ),
       bottomNavigationBar: BottomNavScreen(
         currentIndex: _currentIndex,
         onTap: _handleTabSelect,
@@ -299,6 +333,7 @@ class SearchTab extends StatelessWidget {
             child: TextField(
               controller: controller,
               textInputAction: TextInputAction.search,
+              style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 prefixIcon: Padding(
                   padding: const EdgeInsets.only(left: 16, right: 12),
@@ -306,7 +341,7 @@ class SearchTab extends StatelessWidget {
                     _searchIcon,
                     width: 20,
                     colorFilter: const ColorFilter.mode(
-                      Color(0xFF959595),
+                      Color(0xFFE0E5F2),
                       BlendMode.srcIn,
                     ),
                   ),
@@ -316,16 +351,17 @@ class SearchTab extends StatelessWidget {
                   minHeight: 0,
                 ),
                 hintText: 'Cari Universitas...',
-                hintStyle: const TextStyle(color: Color(0xFF9F9F9F)),
+                hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
                 filled: true,
-                fillColor: const Color(0xFFF7F7F7),
+                fillColor: Colors.white.withValues(alpha: 0.08),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 14,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none,
+                  borderSide:
+                      BorderSide(color: Colors.white.withValues(alpha: 0.12)),
                 ),
               ),
             ),
@@ -342,35 +378,43 @@ class SearchTab extends StatelessWidget {
                     physics: const BouncingScrollPhysics(),
                     itemCount: specialities.length,
                     separatorBuilder: (_, __) => const SizedBox(width: 8),
-                    itemBuilder: (_, index) {
-                      final item = specialities[index];
-                      final isSelected = item == selectedSpeciality;
-                      return ChoiceChip(
-                        label: Text(item),
-                        selected: isSelected,
-                        selectedColor:
-                            const Color(0xFFFF7643).withValues(alpha: 0.16),
-                        backgroundColor: const Color(0xFFF3F3F3),
-                        labelStyle: TextStyle(
+                  itemBuilder: (_, index) {
+                    final item = specialities[index];
+                    final isSelected = item == selectedSpeciality;
+                    return ChoiceChip(
+                      label: Text(item),
+                      selected: isSelected,
+                      selectedColor: Colors.white,
+                      backgroundColor: Colors.white.withValues(alpha: 0.92),
+                      checkmarkColor: _brandColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        side: BorderSide(
                           color: isSelected
-                              ? const Color(0xFFFF7643)
-                              : const Color(0xFF5A5A5A),
-                          fontWeight:
-                              isSelected ? FontWeight.w700 : FontWeight.w500,
+                              ? _brandColor
+                              : Colors.white.withValues(alpha: 0.35),
                         ),
-                        onSelected: (_) => onSpecialitySelected(item),
-                      );
-                    },
-                  ),
+                      ),
+                      labelStyle: TextStyle(
+                        color: isSelected
+                            ? _brandColor
+                            : const Color(0xFF374151),
+                        fontWeight:
+                            isSelected ? FontWeight.w700 : FontWeight.w500,
+                      ),
+                      onSelected: (_) => onSpecialitySelected(item),
+                    );
+                  },
+                ),
                 ),
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    const Text(
+                    Text(
                       'Urutkan:',
                       style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF3A3A3A),
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white.withValues(alpha: 0.85),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -378,7 +422,10 @@ class SearchTab extends StatelessWidget {
                       value: selectedSort,
                       underline: const SizedBox.shrink(),
                       borderRadius: BorderRadius.circular(12),
-                      icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                      dropdownColor: const Color(0xFF121A2F),
+                      style: const TextStyle(color: Colors.white),
+                      icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                          color: Colors.white),
                       items: sortOptions
                           .map(
                             (option) => DropdownMenuItem<String>(
@@ -402,7 +449,7 @@ class SearchTab extends StatelessWidget {
               child: Text(
                 'Menampilkan ${results.length} hasil',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: const Color(0xFF959595),
+                  color: Colors.white.withValues(alpha: 0.7),
                 ),
               ),
             ),
@@ -514,6 +561,67 @@ class CompareTab extends StatelessWidget {
   }
 }
 
+class _GlassTopBar extends StatelessWidget {
+  const _GlassTopBar({
+    required this.title,
+    this.subtitle,
+    required this.badgeText,
+    this.useBlur = true,
+  });
+
+  final String title;
+  final String? subtitle;
+  final String badgeText;
+  final bool useBlur;
+
+  @override
+  Widget build(BuildContext context) {
+    final inner = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const LinearGradient(
+                colors: [
+                  _brandColor,
+                  Color(0xFFFF9E58),
+                ],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: _brandColor.withValues(alpha: 0.35),
+                  blurRadius: 14,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: const Icon(Icons.apartment_rounded,
+                color: Colors.white, size: 22),
+          ),
+        ],
+      ),
+    );
+
+    if (!useBlur) return inner;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: inner,
+      ),
+    );
+  }
+}
+
 class _SectionHeader extends StatelessWidget {
   const _SectionHeader({required this.title, this.subtitle});
 
@@ -529,8 +637,8 @@ class _SectionHeader extends StatelessWidget {
         Text(
           title,
           style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF1F1F1F),
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
           ),
         ),
         if (subtitle != null) ...[
@@ -538,7 +646,7 @@ class _SectionHeader extends StatelessWidget {
           Text(
             subtitle!,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: const Color(0xFF8A8A8A),
+              color: Colors.white.withValues(alpha: 0.72),
             ),
           ),
         ],
@@ -562,17 +670,17 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.school_outlined,
               size: 48,
-              color: Color(0xFFBEBEBE),
+              color: Colors.white.withValues(alpha: 0.6),
             ),
             const SizedBox(height: 16),
             Text(
               title,
               style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF2C2C2C),
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
               ),
               textAlign: TextAlign.center,
             ),
@@ -580,7 +688,7 @@ class _EmptyState extends StatelessWidget {
             Text(
               subtitle,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFF8A8A8A),
+                color: Colors.white.withValues(alpha: 0.7),
               ),
               textAlign: TextAlign.center,
             ),

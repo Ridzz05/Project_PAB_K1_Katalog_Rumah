@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-const Color inActiveIconColor = Color.fromARGB(255, 138, 142, 138);
-
 class BottomNavScreen extends StatelessWidget {
   const BottomNavScreen({
     super.key,
@@ -21,13 +19,21 @@ class BottomNavScreen extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF121A2F),
+                Color(0xFF0E1426),
+              ],
+            ),
             borderRadius: BorderRadius.circular(20),
-            boxShadow: const [
+            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+            boxShadow: [
               BoxShadow(
-                color: Color(0x1A000000),
-                blurRadius: 12,
-                offset: Offset(0, 6),
+                color: Colors.black.withValues(alpha: 0.25),
+                blurRadius: 18,
+                offset: const Offset(0, 10),
               ),
             ],
           ),
@@ -42,14 +48,14 @@ class BottomNavScreen extends StatelessWidget {
                     if (states.contains(WidgetState.selected)) {
                       return const TextStyle(
                         fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFFFF7643),
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
                       );
                     }
                     return const TextStyle(
                       fontSize: 11,
-                      fontWeight: FontWeight.w400,
-                      color: inActiveIconColor,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFFA0AEC3),
                     );
                   }),
                 ),
@@ -59,8 +65,8 @@ class BottomNavScreen extends StatelessWidget {
                 onDestinationSelected: onTap,
                 height: 72,
                 elevation: 0,
-                backgroundColor: Colors.white,
-                indicatorColor: const Color(0x1AFF7643),
+                backgroundColor: Colors.transparent,
+                indicatorColor: const Color(0x33FF7643),
                 animationDuration: const Duration(milliseconds: 350),
                 labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
                 destinations: [
@@ -68,7 +74,7 @@ class BottomNavScreen extends StatelessWidget {
                     icon: SvgPicture.string(
                       homeIcon,
                       colorFilter: const ColorFilter.mode(
-                        inActiveIconColor,
+                        Color(0xFFA0AEC3),
                         BlendMode.srcIn,
                       ),
                     ),
@@ -76,7 +82,7 @@ class BottomNavScreen extends StatelessWidget {
                       child: SvgPicture.string(
                         homeIcon,
                         colorFilter: const ColorFilter.mode(
-                          Color(0xFFFF7643),
+                          Colors.white,
                           BlendMode.srcIn,
                         ),
                       ),
@@ -87,7 +93,7 @@ class BottomNavScreen extends StatelessWidget {
                     icon: SvgPicture.string(
                       searchIcon,
                       colorFilter: const ColorFilter.mode(
-                        inActiveIconColor,
+                        Color(0xFFA0AEC3),
                         BlendMode.srcIn,
                       ),
                     ),
@@ -95,7 +101,7 @@ class BottomNavScreen extends StatelessWidget {
                       child: SvgPicture.string(
                         searchIcon,
                         colorFilter: const ColorFilter.mode(
-                          Color(0xFFFF7643),
+                          Colors.white,
                           BlendMode.srcIn,
                         ),
                       ),
@@ -106,7 +112,7 @@ class BottomNavScreen extends StatelessWidget {
                     icon: SvgPicture.string(
                       favoriteIcon,
                       colorFilter: const ColorFilter.mode(
-                        inActiveIconColor,
+                        Color(0xFFA0AEC3),
                         BlendMode.srcIn,
                       ),
                     ),
@@ -114,7 +120,7 @@ class BottomNavScreen extends StatelessWidget {
                       child: SvgPicture.string(
                         favoriteIcon,
                         colorFilter: const ColorFilter.mode(
-                          Color(0xFFFF7643),
+                          Colors.white,
                           BlendMode.srcIn,
                         ),
                       ),
@@ -125,7 +131,7 @@ class BottomNavScreen extends StatelessWidget {
                     icon: SvgPicture.string(
                       compareIcon,
                       colorFilter: const ColorFilter.mode(
-                        inActiveIconColor,
+                        Color(0xFFA0AEC3),
                         BlendMode.srcIn,
                       ),
                     ),
@@ -133,7 +139,7 @@ class BottomNavScreen extends StatelessWidget {
                       child: SvgPicture.string(
                         compareIcon,
                         colorFilter: const ColorFilter.mode(
-                          Color(0xFFFF7643),
+                          Colors.white,
                           BlendMode.srcIn,
                         ),
                       ),
@@ -144,7 +150,7 @@ class BottomNavScreen extends StatelessWidget {
                     icon: SvgPicture.string(
                       userIcon,
                       colorFilter: const ColorFilter.mode(
-                        inActiveIconColor,
+                        Color(0xFFA0AEC3),
                         BlendMode.srcIn,
                       ),
                     ),
@@ -152,7 +158,7 @@ class BottomNavScreen extends StatelessWidget {
                       child: SvgPicture.string(
                         userIcon,
                         colorFilter: const ColorFilter.mode(
-                          Color(0xFFFF7643),
+                          Colors.white,
                           BlendMode.srcIn,
                         ),
                       ),

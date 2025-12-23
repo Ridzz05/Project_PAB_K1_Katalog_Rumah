@@ -46,12 +46,8 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
   }
 
   void _handleToggleCompare() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Gunakan tab Compare untuk membandingkan universitas.'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+    // Pop kembali dan sinyal untuk membuka tab Compare
+    Navigator.of(context).pop('navigate_to_compare');
   }
 
   @override

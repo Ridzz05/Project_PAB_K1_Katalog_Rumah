@@ -106,6 +106,26 @@ class _AppShellState extends State<AppShell> {
     setState(() => _currentIndex = index);
   }
 
+  Future<void> _navigateToUniversityDetail({
+    required University university,
+    required bool isFavorite,
+  }) async {
+    final result = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) => UniversityDetailScreen(
+          university: university,
+          isFavorite: isFavorite,
+          onToggleFavorite: () => _toggleFavorite(university),
+        ),
+      ),
+    );
+
+    // Jika user menekan tombol "Buka tab Compare", arahkan ke tab Compare
+    if (result == 'navigate_to_compare') {
+      _handleTabSelect(3); // 3 adalah index tab Compare
+    }
+  }
+
   void _toggleFavorite(University university) {
     setState(() {
       if (_favoriteIds.contains(university.id)) {
@@ -274,15 +294,11 @@ class HomeTab extends StatelessWidget {
             onToggleFavorite: () => onToggleFavorite(university),
             showFavoriteButton: false,
             showPreviewDetails: false,
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => UniversityDetailScreen(
+            onTap: () => context.findAncestorStateOfType<_AppShellState>()
+                ?._navigateToUniversityDetail(
                   university: university,
                   isFavorite: isFavorite,
-                  onToggleFavorite: () => onToggleFavorite(university),
                 ),
-              ),
-            ),
           );
         },
       ),
@@ -474,16 +490,11 @@ class SearchTab extends StatelessWidget {
                         onToggleFavorite: () => onToggleFavorite(university),
                         showFavoriteButton: false,
                         showPreviewDetails: false,
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => UniversityDetailScreen(
+                        onTap: () => context.findAncestorStateOfType<_AppShellState>()
+                            ?._navigateToUniversityDetail(
                               university: university,
                               isFavorite: isFavorite,
-                              onToggleFavorite: () =>
-                                  onToggleFavorite(university),
                             ),
-                          ),
-                        ),
                       );
                     },
                   ),
@@ -534,15 +545,11 @@ class FavoritesTab extends StatelessWidget {
             isFavorite: true,
             onToggleFavorite: () => onToggleFavorite(university),
             showPreviewDetails: false,
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => UniversityDetailScreen(
+            onTap: () => context.findAncestorStateOfType<_AppShellState>()
+                ?._navigateToUniversityDetail(
                   university: university,
                   isFavorite: true,
-                  onToggleFavorite: () => onToggleFavorite(university),
                 ),
-              ),
-            ),
           );
         },
       ),

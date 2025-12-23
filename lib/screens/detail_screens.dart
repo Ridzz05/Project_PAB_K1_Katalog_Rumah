@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import '../components/university_tile.dart';
 import '../data/data_universitas.dart';
-import '../main.dart';
 
 class UniversityDetailScreen extends StatefulWidget {
   const UniversityDetailScreen({

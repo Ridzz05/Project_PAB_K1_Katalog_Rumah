@@ -45,13 +45,21 @@ class BottomNavScreen extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF121A2F),
+                Color(0xFF0E1426),
+              ],
+            ),
             borderRadius: BorderRadius.circular(20),
-            boxShadow: const [
+            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+            boxShadow: [
               BoxShadow(
-                color: Color(0x1A000000),
-                blurRadius: 12,
-                offset: Offset(0, 6),
+                color: Colors.black.withValues(alpha: 0.25),
+                blurRadius: 18,
+                offset: const Offset(0, 10),
               ),
             ],
           ),

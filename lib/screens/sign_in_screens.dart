@@ -35,7 +35,7 @@ class SignInScreen extends StatelessWidget {
     if (result == true && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Akun berhasil dibuat. Silakan masuk.'),
+          content: Text('Akun berhasil dibuat. Kamu sudah masuk.'),
         ),
       );
     }

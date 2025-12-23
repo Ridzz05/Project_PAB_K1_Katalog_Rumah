@@ -104,7 +104,9 @@ class _CompareScreenState extends State<CompareScreen> {
         body: content,
       );
     }
-    return content;
+    return SafeArea(
+      child: content,
+    );
   }
 }
 
@@ -132,22 +134,42 @@ class _Selector extends StatelessWidget {
           .map(
             (u) => DropdownMenuItem(
               value: u,
-              child: Text(u.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+              child: Text(
+                u.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: Colors.white),
+              ),
             ),
           )
           .toList(),
       onChanged: (next) {
         if (next != null) onChanged(next);
       },
+      dropdownColor: const Color(0xFF0F172A),
+      style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         labelText: label,
+        labelStyle: TextStyle(
+          color: Colors.white.withValues(alpha: 0.8),
+          fontWeight: FontWeight.w600,
+        ),
+        filled: true,
+        fillColor: const Color(0xFF111A2E),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 12,
         ),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.18)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.32)),
+        ),
       ),
-      icon: const Icon(Icons.keyboard_arrow_down_rounded),
+      icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white),
     );
   }
 }

@@ -112,6 +112,7 @@ class AuthController extends ChangeNotifier {
       _userEmail = trimmedEmail;
       _userPassword = trimmedPassword;
       _errorMessage = null;
+      _isAuthenticated = true;
     } catch (_) {
       error = 'Gagal menyimpan data. Coba lagi.';
     }

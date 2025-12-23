@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 const Color inActiveIconColor = Color.fromARGB(255, 138, 142, 138);
+const Color _activeIconColor = Color(0xFFFF7643);
+const Color _indicatorColor = Color(0x1AFF7643);
+const Duration _iconAnimationDuration = Duration(milliseconds: 250);
+const Duration _navigationAnimationDuration = Duration(milliseconds: 350);
 
 class BottomNavScreen extends StatelessWidget {
   const BottomNavScreen({
@@ -13,8 +17,28 @@ class BottomNavScreen extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
 
+  static const List<_NavItem> _items = [
+    _NavItem(label: 'Beranda', svg: homeIcon),
+    _NavItem(label: 'Cari', svg: searchIcon),
+    _NavItem(label: 'Favorit', svg: favoriteIcon),
+    _NavItem(label: 'Compare', svg: compareIcon),
+    _NavItem(label: 'Profil', svg: userIcon),
+  ];
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final labelTextStyle = WidgetStateProperty.resolveWith<TextStyle?>((
+      Set<WidgetState> states,
+    ) {
+      const baseStyle = TextStyle(fontSize: 11);
+      final isSelected = states.contains(WidgetState.selected);
+      return baseStyle.copyWith(
+        fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+        color: isSelected ? _activeIconColor : inActiveIconColor,
+      );
+    });
+
     return SafeArea(
       top: false,
       child: Padding(
@@ -34,24 +58,9 @@ class BottomNavScreen extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(20),
             child: Theme(
-              data: Theme.of(context).copyWith(
-                navigationBarTheme: NavigationBarThemeData(
-                  labelTextStyle: WidgetStateProperty.resolveWith<TextStyle?>((
-                    Set<WidgetState> states,
-                  ) {
-                    if (states.contains(WidgetState.selected)) {
-                      return const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFFFF7643),
-                      );
-                    }
-                    return const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w400,
-                      color: inActiveIconColor,
-                    );
-                  }),
+              data: theme.copyWith(
+                navigationBarTheme: theme.navigationBarTheme.copyWith(
+                  labelTextStyle: labelTextStyle,
                 ),
               ),
               child: NavigationBar(
@@ -60,111 +69,53 @@ class BottomNavScreen extends StatelessWidget {
                 height: 72,
                 elevation: 0,
                 backgroundColor: Colors.white,
-                indicatorColor: const Color(0x1AFF7643),
-                animationDuration: const Duration(milliseconds: 350),
+                indicatorColor: _indicatorColor,
+                animationDuration: _navigationAnimationDuration,
                 labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-                destinations: [
-                  NavigationDestination(
-                    icon: SvgPicture.string(
-                      homeIcon,
-                      colorFilter: const ColorFilter.mode(
-                        inActiveIconColor,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                    selectedIcon: _AnimatedActiveIcon(
-                      child: SvgPicture.string(
-                        homeIcon,
-                        colorFilter: const ColorFilter.mode(
-                          Color(0xFFFF7643),
-                          BlendMode.srcIn,
+                destinations: _items
+                    .map(
+                      (item) => NavigationDestination(
+                        icon: _NavIcon(
+                          svg: item.svg,
+                          color: inActiveIconColor,
                         ),
-                      ),
-                    ),
-                    label: 'Beranda',
-                  ),
-                  NavigationDestination(
-                    icon: SvgPicture.string(
-                      searchIcon,
-                      colorFilter: const ColorFilter.mode(
-                        inActiveIconColor,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                    selectedIcon: _AnimatedActiveIcon(
-                      child: SvgPicture.string(
-                        searchIcon,
-                        colorFilter: const ColorFilter.mode(
-                          Color(0xFFFF7643),
-                          BlendMode.srcIn,
+                        selectedIcon: _AnimatedActiveIcon(
+                          child: _NavIcon(
+                            svg: item.svg,
+                            color: _activeIconColor,
+                          ),
                         ),
+                        label: item.label,
                       ),
-                    ),
-                    label: 'Cari',
-                  ),
-                  NavigationDestination(
-                    icon: SvgPicture.string(
-                      favoriteIcon,
-                      colorFilter: const ColorFilter.mode(
-                        inActiveIconColor,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                    selectedIcon: _AnimatedActiveIcon(
-                      child: SvgPicture.string(
-                        favoriteIcon,
-                        colorFilter: const ColorFilter.mode(
-                          Color(0xFFFF7643),
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                    ),
-                    label: 'Favorit',
-                  ),
-                  NavigationDestination(
-                    icon: SvgPicture.string(
-                      compareIcon,
-                      colorFilter: const ColorFilter.mode(
-                        inActiveIconColor,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                    selectedIcon: _AnimatedActiveIcon(
-                      child: SvgPicture.string(
-                        compareIcon,
-                        colorFilter: const ColorFilter.mode(
-                          Color(0xFFFF7643),
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                    ),
-                    label: 'Compare',
-                  ),
-                  NavigationDestination(
-                    icon: SvgPicture.string(
-                      userIcon,
-                      colorFilter: const ColorFilter.mode(
-                        inActiveIconColor,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                    selectedIcon: _AnimatedActiveIcon(
-                      child: SvgPicture.string(
-                        userIcon,
-                        colorFilter: const ColorFilter.mode(
-                          Color(0xFFFF7643),
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                    ),
-                    label: 'Profil',
-                  ),
-                ],
+                    )
+                    .toList(),
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _NavItem {
+  const _NavItem({required this.label, required this.svg});
+
+  final String label;
+  final String svg;
+}
+
+class _NavIcon extends StatelessWidget {
+  const _NavIcon({required this.svg, required this.color});
+
+  final String svg;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return SvgPicture.string(
+      svg,
+      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
     );
   }
 }
@@ -176,20 +127,15 @@ class _AnimatedActiveIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedScale(
-      scale: 1,
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeOutBack,
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 250),
-        switchInCurve: Curves.easeOutCubic,
-        switchOutCurve: Curves.easeInCubic,
-        transitionBuilder: (child, animation) => ScaleTransition(
-          scale: Tween<double>(begin: 0.9, end: 1).animate(animation),
-          child: FadeTransition(opacity: animation, child: child),
-        ),
-        child: child,
+    return AnimatedSwitcher(
+      duration: _iconAnimationDuration,
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (child, animation) => ScaleTransition(
+        scale: Tween<double>(begin: 0.9, end: 1).animate(animation),
+        child: FadeTransition(opacity: animation, child: child),
       ),
+      child: child,
     );
   }
 }

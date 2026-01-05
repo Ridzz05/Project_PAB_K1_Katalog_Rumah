@@ -104,7 +104,7 @@ class AuthGate extends StatelessWidget {
           ? AppShell(key: const ValueKey('app-shell'), onLogout: auth.logout)
           : LandingScreen(
               key: const ValueKey('landing'),
-              onStart: () => _openRegister(context, auth),
+
               onLogin: () => _openLogin(context, auth),
               onSignUp: () => _openRegister(context, auth),
             ),

@@ -135,11 +135,14 @@ class _Selector extends StatelessWidget {
           .map(
             (u) => DropdownMenuItem(
               value: u,
-              child: Text(
-                u.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: AppColors.textPrimary(context)),
+              child: SizedBox(
+                width: 200,
+                child: Text(
+                  u.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: AppColors.textPrimary(context)),
+                ),
               ),
             ),
           )

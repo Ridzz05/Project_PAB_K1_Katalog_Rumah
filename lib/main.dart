@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-
 import 'auth/auth.dart';
 import 'screens/app_shell.dart';
 import 'screens/landing_screen.dart';
+import 'theme/app_theme.dart';
+import 'theme/theme_controller.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,41 +18,34 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final AuthController _authController = AuthController();
+  final ThemeController _themeController = ThemeController();
 
   @override
   void dispose() {
     _authController.dispose();
+    _themeController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return AuthScope(
-      controller: _authController,
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'UniFinder',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFFFF7643),
-            brightness: Brightness.light,
-          ),
-          scaffoldBackgroundColor: Colors.white,
-          useMaterial3: true,
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Colors.white,
-            foregroundColor: Color(0xFF1F1F1F),
-            centerTitle: false,
-            titleSpacing: 20,
-            elevation: 0,
-            titleTextStyle: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF1F1F1F),
-            ),
-          ),
+    return ThemeControllerScope(
+      controller: _themeController,
+      child: AuthScope(
+        controller: _authController,
+        child: AnimatedBuilder(
+          animation: _themeController,
+          builder: (context, _) {
+            return MaterialApp(
+              debugShowCheckedModeBanner: false,
+              title: 'UniFinder',
+              theme: AppTheme.light(),
+              darkTheme: AppTheme.dark(),
+              themeMode: _themeController.mode,
+              home: const AuthGate(),
+            );
+          },
         ),
-        home: const AuthGate(),
       ),
     );
   }
@@ -60,10 +54,7 @@ class _MyAppState extends State<MyApp> {
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
-  Future<void> _openLogin(
-    BuildContext context,
-    AuthController auth,
-  ) async {
+  Future<void> _openLogin(BuildContext context, AuthController auth) async {
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => AnimatedBuilder(
@@ -86,15 +77,10 @@ class AuthGate extends StatelessWidget {
     );
   }
 
-  Future<void> _openRegister(
-    BuildContext context,
-    AuthController auth,
-  ) async {
+  Future<void> _openRegister(BuildContext context, AuthController auth) async {
     final result = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
-        builder: (_) => RegisterScreen(
-          onRegister: auth.register,
-        ),
+        builder: (_) => RegisterScreen(onRegister: auth.register),
       ),
     );
 

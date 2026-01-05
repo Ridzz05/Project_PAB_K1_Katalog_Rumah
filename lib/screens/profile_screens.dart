@@ -4,6 +4,9 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../theme/app_colors.dart';
+import '../theme/theme_controller.dart';
+
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({
     super.key,
@@ -22,6 +25,7 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeController = ThemeControllerScope.of(context);
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(vertical: 20),
@@ -36,6 +40,11 @@ class ProfileScreen extends StatelessWidget {
               favoriteCount: favoriteCount,
             ),
             const SizedBox(height: 20),
+            ThemeToggleCard(
+              isDark: themeController.isDark,
+              onToggle: themeController.toggleTheme,
+            ),
+            const SizedBox(height: 12),
             ProfileMenu(
               text: "Log Out",
               iconSvg: logoutIconSvg,
@@ -153,9 +162,9 @@ class _ProfilePicState extends State<ProfilePic> {
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(50),
-                    side: const BorderSide(color: Colors.white),
+                    side: BorderSide(color: AppColors.border(context)),
                   ),
-                  backgroundColor: const Color(0xFFF5F6F9),
+                  backgroundColor: AppColors.surface(context),
                 ),
                 onPressed: _pickFromGallery,
                 child: SvgPicture.string(cameraIcon),
@@ -181,15 +190,17 @@ class ProfileMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final surface = AppColors.surface(context);
+    final textMuted = AppColors.textMuted(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: TextButton(
         style: TextButton.styleFrom(
-          foregroundColor: const Color(0xFFFF7643),
+          foregroundColor: AppColors.brand,
           padding: const EdgeInsets.all(20),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          backgroundColor: const Color(0xFFF5F6F9),
+          backgroundColor: surface,
         ),
         onPressed: press,
         child: Row(
@@ -197,24 +208,96 @@ class ProfileMenu extends StatelessWidget {
             SvgPicture.string(
               iconSvg,
               colorFilter:
-                  const ColorFilter.mode(Color(0xFFFF7643), BlendMode.srcIn),
+                  const ColorFilter.mode(AppColors.brand, BlendMode.srcIn),
               width: 22,
             ),
             const SizedBox(width: 20),
             Expanded(
               child: Text(
                 text,
-                style: const TextStyle(
-                  color: Color(0xFF757575),
+                style: TextStyle(
+                  color: textMuted,
                 ),
               ),
             ),
-            const Icon(
+            Icon(
               Icons.arrow_forward_ios,
-              color: Color(0xFF757575),
+              color: textMuted,
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class ThemeToggleCard extends StatelessWidget {
+  const ThemeToggleCard({
+    super.key,
+    required this.isDark,
+    required this.onToggle,
+  });
+
+  final bool isDark;
+  final VoidCallback onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final surface = AppColors.surface(context);
+    final textPrimary = AppColors.textPrimary(context);
+    final textMuted = AppColors.textMuted(context);
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border(context)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.brand.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.brightness_6_rounded,
+              color: AppColors.brand,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Tema',
+                  style: TextStyle(
+                    color: textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  isDark ? 'Gelap aktif' : 'Terang aktif',
+                  style: TextStyle(
+                    color: textMuted,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: isDark,
+            onChanged: (_) => onToggle(),
+            activeColor: AppColors.brand,
+          ),
+        ],
       ),
     );
   }
@@ -235,21 +318,23 @@ class _ProfileInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final surface = AppColors.surface(context);
+    final textPrimary = AppColors.textPrimary(context);
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F6F9),
+        color: surface,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Data Akun',
             style: TextStyle(
-              color: Color(0xFF1F1F1F),
+              color: textPrimary,
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
@@ -300,6 +385,8 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textPrimary = AppColors.textPrimary(context);
+    final textMuted = AppColors.textMuted(context);
     return Column(
       children: [
         Row(
@@ -312,8 +399,8 @@ class _InfoRow extends StatelessWidget {
                 iconSvg,
                 width: 18,
                 height: 18,
-                colorFilter: const ColorFilter.mode(
-                  Color(0xFF757575),
+                colorFilter: ColorFilter.mode(
+                  textMuted,
                   BlendMode.srcIn,
                 ),
               ),
@@ -321,8 +408,8 @@ class _InfoRow extends StatelessWidget {
             const SizedBox(width: 12),
             Text(
               '$label:',
-              style: const TextStyle(
-                color: Color(0xFF757575),
+              style: TextStyle(
+                color: textMuted,
                 fontSize: 12,
               ),
             ),
@@ -330,8 +417,8 @@ class _InfoRow extends StatelessWidget {
             Expanded(
               child: Text(
                 value,
-                style: const TextStyle(
-                  color: Color(0xFF1F1F1F),
+                style: TextStyle(
+                  color: textPrimary,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -342,10 +429,10 @@ class _InfoRow extends StatelessWidget {
         ),
         if (showDivider) ...[
           const SizedBox(height: 12),
-          const Divider(
+          Divider(
             height: 1,
             thickness: 1,
-            color: Color(0xFFE0E0E0),
+            color: AppColors.border(context),
           ),
           const SizedBox(height: 12),
         ],

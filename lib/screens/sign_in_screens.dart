@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../theme/app_colors.dart';
+
 const String authIconAsset = 'images/unifind.jpg';
 
-const authOutlineInputBorder = OutlineInputBorder(
-  borderSide: BorderSide(color: Color(0xFF757575)),
-  borderRadius: BorderRadius.all(Radius.circular(100)),
-);
+OutlineInputBorder _authOutlineInputBorder(BuildContext context) {
+  return OutlineInputBorder(
+    borderSide: BorderSide(color: AppColors.border(context)),
+    borderRadius: const BorderRadius.all(Radius.circular(100)),
+  );
+}
 
 class SignInScreen extends StatelessWidget {
   const SignInScreen({
@@ -43,10 +47,12 @@ class SignInScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textPrimary = AppColors.textPrimary(context);
+    final textMuted = AppColors.textMuted(context);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background(context),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         title: const Text("Sign In"),
       ),
       body: SafeArea(
@@ -63,24 +69,24 @@ class SignInScreen extends StatelessWidget {
                     child: _AuthLogo(),
                   ),
                   const SizedBox(height: 16),
-                  const _FadeSlide(
+                  _FadeSlide(
                     delayMs: 100,
                     child: Text(
                       "UniFinder",
                       style: TextStyle(
-                        color: Colors.black,
+                        color: textPrimary,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                   const SizedBox(height: 12),
-                  const _FadeSlide(
+                  _FadeSlide(
                     delayMs: 200,
                     child: Text(
                       "Selamat Datang Di Aplikasi Daftar Universitas Di Sumatera Selatan",
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Color(0xFF757575)),
+                      style: TextStyle(color: textMuted),
                     ),
                   ),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.05),
@@ -155,6 +161,7 @@ class _SignInFormState extends State<SignInForm> {
 
   @override
   Widget build(BuildContext context) {
+    final textMuted = AppColors.textMuted(context);
     return Form(
       key: _formKey,
       child: Column(
@@ -167,18 +174,19 @@ class _SignInFormState extends State<SignInForm> {
               hintText: "Masukkan email Anda",
               labelText: "Email",
               floatingLabelBehavior: FloatingLabelBehavior.always,
-              hintStyle: const TextStyle(color: Color(0xFF757575)),
+              hintStyle: TextStyle(color: textMuted),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 24,
                 vertical: 16,
               ),
               suffix: SvgPicture.string(
                 mailIcon,
+                colorFilter: ColorFilter.mode(textMuted, BlendMode.srcIn),
               ),
-              border: authOutlineInputBorder,
-              enabledBorder: authOutlineInputBorder,
-              focusedBorder: authOutlineInputBorder.copyWith(
-                borderSide: const BorderSide(color: Color(0xFFFF7643)),
+              border: _authOutlineInputBorder(context),
+              enabledBorder: _authOutlineInputBorder(context),
+              focusedBorder: _authOutlineInputBorder(context).copyWith(
+                borderSide: BorderSide(color: AppColors.brand),
               ),
             ),
             validator: (value) {
@@ -203,18 +211,19 @@ class _SignInFormState extends State<SignInForm> {
                 hintText: "Enter your password",
                 labelText: "Password",
                 floatingLabelBehavior: FloatingLabelBehavior.always,
-                hintStyle: const TextStyle(color: Color(0xFF757575)),
+                hintStyle: TextStyle(color: textMuted),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 16,
                 ),
                 suffix: SvgPicture.string(
                   lockIcon,
+                  colorFilter: ColorFilter.mode(textMuted, BlendMode.srcIn),
                 ),
-                border: authOutlineInputBorder,
-                enabledBorder: authOutlineInputBorder,
-                focusedBorder: authOutlineInputBorder.copyWith(
-                  borderSide: const BorderSide(color: Color(0xFFFF7643)),
+                border: _authOutlineInputBorder(context),
+                enabledBorder: _authOutlineInputBorder(context),
+                focusedBorder: _authOutlineInputBorder(context).copyWith(
+                  borderSide: BorderSide(color: AppColors.brand),
                 ),
               ),
               validator: (value) {
@@ -248,7 +257,7 @@ class _SignInFormState extends State<SignInForm> {
             onPressed: widget.isLoading ? null : _handleSubmit,
             style: ElevatedButton.styleFrom(
               elevation: 0,
-              backgroundColor: const Color(0xFFFF7643),
+              backgroundColor: AppColors.brand,
               foregroundColor: Colors.white,
               minimumSize: const Size(double.infinity, 48),
               shape: const RoundedRectangleBorder(
@@ -300,8 +309,8 @@ class _AuthLogo extends StatelessWidget {
     return Container(
       width: 96,
       height: 96,
-      decoration: const BoxDecoration(
-        color: Color(0x1AFF7643),
+      decoration: BoxDecoration(
+        color: AppColors.brand.withValues(alpha: 0.1),
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,
@@ -324,19 +333,20 @@ class NoAccountText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textMuted = AppColors.textMuted(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text(
+        Text(
           "Belum punya akun? ",
-          style: TextStyle(color: Color(0xFF757575)),
+          style: TextStyle(color: textMuted),
         ),
         GestureDetector(
           onTap: onTap,
           child: const Text(
             "Daftar Disini",
             style: TextStyle(
-              color: Color(0xFFFF7643),
+              color: AppColors.brand,
             ),
           ),
         ),
@@ -412,6 +422,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final textMuted = AppColors.textMuted(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Sign Up'),
@@ -428,19 +439,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: _AuthLogo(),
                 ),
                 const SizedBox(height: 12),
-                const Text(
+                Text(
                   'Lengkapi data Anda untuk membuat akun baru.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Color(0xFF757575),
+                    color: textMuted,
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'Data ini disimpan secara lokal sehingga Anda dapat masuk kembali tanpa koneksi internet.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Color(0xFF9E9E9E),
+                    color: textMuted.withValues(alpha: 0.8),
                     fontSize: 12,
                   ),
                 ),
@@ -453,15 +464,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     hintText: "Masukkan Nama Anda",
                     labelText: "Nama",
                     floatingLabelBehavior: FloatingLabelBehavior.always,
-                    hintStyle: const TextStyle(color: Color(0xFF757575)),
+                    hintStyle: TextStyle(color: textMuted),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 24,
                       vertical: 16,
                     ),
-                    border: authOutlineInputBorder,
-                    enabledBorder: authOutlineInputBorder,
-                    focusedBorder: authOutlineInputBorder.copyWith(
-                      borderSide: const BorderSide(color: Color(0xFFFF7643)),
+                    border: _authOutlineInputBorder(context),
+                    enabledBorder: _authOutlineInputBorder(context),
+                    focusedBorder: _authOutlineInputBorder(context).copyWith(
+                      borderSide: const BorderSide(color: AppColors.brand),
                     ),
                   ),
                   validator: (value) {
@@ -481,18 +492,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     hintText: "Masukkan email Anda",
                     labelText: "Email",
                     floatingLabelBehavior: FloatingLabelBehavior.always,
-                    hintStyle: const TextStyle(color: Color(0xFF757575)),
+                    hintStyle: TextStyle(color: textMuted),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 24,
                       vertical: 16,
                     ),
                     suffix: SvgPicture.string(
                       mailIcon,
+                      colorFilter: ColorFilter.mode(textMuted, BlendMode.srcIn),
                     ),
-                    border: authOutlineInputBorder,
-                    enabledBorder: authOutlineInputBorder,
-                    focusedBorder: authOutlineInputBorder.copyWith(
-                      borderSide: const BorderSide(color: Color(0xFFFF7643)),
+                    border: _authOutlineInputBorder(context),
+                    enabledBorder: _authOutlineInputBorder(context),
+                    focusedBorder: _authOutlineInputBorder(context).copyWith(
+                      borderSide: const BorderSide(color: AppColors.brand),
                     ),
                   ),
                   validator: (value) {
@@ -517,18 +529,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     hintText: "Masukkan password Anda",
                     labelText: "Password",
                     floatingLabelBehavior: FloatingLabelBehavior.always,
-                    hintStyle: const TextStyle(color: Color(0xFF757575)),
+                    hintStyle: TextStyle(color: textMuted),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 24,
                       vertical: 16,
                     ),
                     suffix: SvgPicture.string(
                       lockIcon,
+                      colorFilter: ColorFilter.mode(textMuted, BlendMode.srcIn),
                     ),
-                    border: authOutlineInputBorder,
-                    enabledBorder: authOutlineInputBorder,
-                    focusedBorder: authOutlineInputBorder.copyWith(
-                      borderSide: const BorderSide(color: Color(0xFFFF7643)),
+                    border: _authOutlineInputBorder(context),
+                    enabledBorder: _authOutlineInputBorder(context),
+                    focusedBorder: _authOutlineInputBorder(context).copyWith(
+                      borderSide: const BorderSide(color: AppColors.brand),
                     ),
                   ),
                   validator: (value) {
@@ -558,7 +571,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   onPressed: _isSubmitting ? null : _handleSubmit,
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
-                    backgroundColor: const Color(0xFFFF7643),
+                    backgroundColor: AppColors.brand,
                     foregroundColor: Colors.white,
                     minimumSize: const Size(double.infinity, 48),
                     shape: const RoundedRectangleBorder(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../components/university_tile.dart';
 import '../data/data_universitas.dart';
+import '../theme/app_colors.dart';
 
 class UniversityDetailScreen extends StatefulWidget {
   const UniversityDetailScreen({
@@ -52,12 +53,16 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final textPrimary = AppColors.textPrimary(context);
+    final textMuted = AppColors.textMuted(context);
+    final surface = AppColors.surface(context);
     final otherUniversities = demoUniversities
         .where((uni) => uni.id != widget.university.id)
         .take(3)
         .toList();
 
     return Scaffold(
+      backgroundColor: AppColors.background(context),
       body: Stack(
         children: [
           CustomScrollView(
@@ -77,11 +82,11 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                         widget.university.imageUrl,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) => Container(
-                          color: const Color(0xFFF0F0F0),
-                          child: const Icon(
+                          color: AppColors.surface(context),
+                          child: Icon(
                             Icons.school_outlined,
                             size: 100,
-                            color: Color(0xFFB6B6B6),
+                            color: textMuted,
                           ),
                         ),
                       ),
@@ -118,28 +123,28 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                     children: [
                       Text(
                         widget.university.name,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF1F1F1F),
+                          color: textPrimary,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.location_on,
                             size: 18,
-                            color: Color(0xFF7A7A7A),
+                            color: textMuted,
                           ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               widget.university.location,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
-                                color: Color(0xFF7A7A7A),
+                                color: textMuted,
                                 height: 1.4,
                               ),
                               maxLines: 3,
@@ -156,26 +161,26 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0x1AFF7643),
+                            color: AppColors.brand.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
                             widget.university.speciality,
                             style: const TextStyle(
                               fontSize: 12,
-                              color: Color(0xFFFF7643),
+                              color: AppColors.brand,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
                       ],
                       const SizedBox(height: 24),
-                      const Text(
+                      Text(
                         'Deskripsi',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF1F1F1F),
+                          color: textPrimary,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -183,20 +188,20 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                         widget.university.description.isNotEmpty
                             ? widget.university.description
                             : 'Tidak ada deskripsi tersedia untuk universitas ini.',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15,
-                          color: Color(0xFF4A4A4A),
+                          color: textMuted,
                           height: 1.6,
                         ),
                       ),
                       if (widget.university.faculties.isNotEmpty) ...[
                         const SizedBox(height: 32),
-                        const Text(
+                        Text(
                           'Fakultas',
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF1F1F1F),
+                            color: textPrimary,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -205,18 +210,18 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                             padding: const EdgeInsets.only(bottom: 8),
                             child: Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.school,
                                   size: 18,
-                                  color: Color(0xFF757575),
+                                  color: textMuted,
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
                                     faculty,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 15,
-                                      color: Color(0xFF4A4A4A),
+                                      color: textMuted,
                                     ),
                                   ),
                                 ),
@@ -227,12 +232,12 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                       ],
                       if (widget.university.programs.isNotEmpty) ...[
                         const SizedBox(height: 32),
-                        const Text(
+                        Text(
                           'Program Studi',
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF1F1F1F),
+                            color: textPrimary,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -241,18 +246,18 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                             padding: const EdgeInsets.only(bottom: 8),
                             child: Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.book,
                                   size: 18,
-                                  color: Color(0xFF757575),
+                                  color: textMuted,
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
                                     program,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 15,
-                                      color: Color(0xFF4A4A4A),
+                                      color: textMuted,
                                     ),
                                   ),
                                 ),
@@ -263,12 +268,12 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                       ],
                       if (widget.university.facilities.isNotEmpty) ...[
                         const SizedBox(height: 32),
-                        const Text(
+                        Text(
                           'Fasilitas',
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF1F1F1F),
+                            color: textPrimary,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -280,12 +285,13 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                                 (facility) => Chip(
                                   label: Text(
                                     facility,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w500,
+                                      color: textPrimary,
                                     ),
                                   ),
-                                  backgroundColor: const Color(0xFFF5F6F9),
+                                  backgroundColor: surface,
                                   side: BorderSide.none,
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 12,
@@ -306,18 +312,18 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                           onPressed: _handleToggleFavorite,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _isFavorite
-                                ? const Color(0xFFFF7643)
-                                : Colors.white,
+                                ? AppColors.brand
+                                : surface,
                             foregroundColor: _isFavorite
                                 ? Colors.white
-                                : const Color(0xFFFF7643),
+                                : AppColors.brand,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                               side: BorderSide(
                                 color: _isFavorite
                                     ? Colors.transparent
-                                    : const Color(0xFFFF7643),
+                                    : AppColors.brand,
                                 width: 2,
                               ),
                             ),
@@ -346,10 +352,10 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                         child: OutlinedButton.icon(
                           onPressed: _handleToggleCompare,
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFFFF7643),
-                            backgroundColor: Colors.white,
+                            foregroundColor: AppColors.brand,
+                            backgroundColor: surface,
                             side: BorderSide(
-                              color: const Color(0xFFFF7643),
+                              color: AppColors.brand,
                               width: 2,
                             ),
                             padding: const EdgeInsets.symmetric(vertical: 14),
@@ -360,7 +366,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                           icon: Icon(
                             Icons.compare_arrows,
                             size: 22,
-                            color: const Color(0xFFFF7643),
+                            color: AppColors.brand,
                           ),
                           label: Text(
                             'Buka tab Compare',
@@ -372,12 +378,12 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                         ),
                       ),
                       const SizedBox(height: 32),
-                      const Text(
+                      Text(
                         'Universitas Lainnya',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF1F1F1F),
+                          color: textPrimary,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -479,12 +485,12 @@ class _SuccessAlertState extends State<_SuccessAlert>
         child: Material(
           elevation: 8,
           borderRadius: BorderRadius.circular(12),
-          color: Colors.white,
+          color: AppColors.surfaceElevated(context),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+              border: Border.all(color: AppColors.border(context), width: 1),
             ),
             child: Row(
               children: [
@@ -493,15 +499,15 @@ class _SuccessAlertState extends State<_SuccessAlert>
                   height: 40,
                   decoration: BoxDecoration(
                     color: widget.isFavorite
-                        ? const Color(0x1AFF7643)
-                        : const Color(0xFFF5F5F5),
+                        ? AppColors.brand.withValues(alpha: 0.12)
+                        : AppColors.surface(context),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     widget.isFavorite ? Icons.favorite : Icons.favorite_border,
                     color: widget.isFavorite
-                        ? const Color(0xFFFF7643)
-                        : const Color(0xFF9E9E9E),
+                        ? AppColors.brand
+                        : AppColors.textMuted(context),
                     size: 20,
                   ),
                 ),
@@ -509,10 +515,10 @@ class _SuccessAlertState extends State<_SuccessAlert>
                 Expanded(
                   child: Text(
                     widget.message,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF1F1F1F),
+                      color: AppColors.textPrimary(context),
                     ),
                   ),
                 ),

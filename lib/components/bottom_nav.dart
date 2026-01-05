@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-const Color inActiveIconColor = Color.fromARGB(255, 138, 142, 138);
-const Color _activeIconColor = Color(0xFFFF7643);
+import '../theme/app_colors.dart';
+
+const Color _activeIconColor = AppColors.brand;
 const Color _indicatorColor = Color(0x1AFF7643);
 const Duration _iconAnimationDuration = Duration(milliseconds: 250);
 const Duration _navigationAnimationDuration = Duration(milliseconds: 350);
@@ -28,6 +29,8 @@ class BottomNavScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final inactiveColor = AppColors.textMuted(context);
+    final isDark = AppColors.isDark(context);
     final labelTextStyle = WidgetStateProperty.resolveWith<TextStyle?>((
       Set<WidgetState> states,
     ) {
@@ -35,7 +38,7 @@ class BottomNavScreen extends StatelessWidget {
       final isSelected = states.contains(WidgetState.selected);
       return baseStyle.copyWith(
         fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
-        color: isSelected ? _activeIconColor : inActiveIconColor,
+        color: isSelected ? _activeIconColor : inactiveColor,
       );
     });
 
@@ -45,16 +48,20 @@ class BottomNavScreen extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: Container(
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Color(0xFF121A2F),
-                Color(0xFF0E1426),
+                isDark ? AppColors.darkSurface : AppColors.lightSurface,
+                isDark ? const Color(0xFF0E1426) : AppColors.lightSurfaceElevated,
               ],
             ),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : AppColors.border(context),
+            ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.25),
@@ -76,7 +83,7 @@ class BottomNavScreen extends StatelessWidget {
                 onDestinationSelected: onTap,
                 height: 72,
                 elevation: 0,
-                backgroundColor: Colors.white,
+                backgroundColor: Colors.transparent,
                 indicatorColor: _indicatorColor,
                 animationDuration: _navigationAnimationDuration,
                 labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
@@ -85,7 +92,7 @@ class BottomNavScreen extends StatelessWidget {
                       (item) => NavigationDestination(
                         icon: _NavIcon(
                           svg: item.svg,
-                          color: inActiveIconColor,
+                          color: inactiveColor,
                         ),
                         selectedIcon: _AnimatedActiveIcon(
                           child: _NavIcon(

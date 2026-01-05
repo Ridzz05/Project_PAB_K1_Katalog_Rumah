@@ -2,20 +2,15 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-const _brandColor = Color(0xFFFF7643);
-const _deepNavy = Color(0xFF0E0C24);
-const _midnight = Color(0xFF0F1F37);
-const _royalPurple = Color(0xFF1C2448);
+import '../theme/app_colors.dart';
 
 class LandingScreen extends StatefulWidget {
   const LandingScreen({
     super.key,
-    required this.onStart,
     required this.onLogin,
     required this.onSignUp,
   });
 
-  final VoidCallback onStart;
   final VoidCallback onLogin;
   final VoidCallback onSignUp;
 
@@ -33,7 +28,7 @@ class _LandingScreenState extends State<LandingScreen> {
       subtitle: 'Universitas pilihan Sumatera Selatan dalam satu aplikasi.',
       asset: 'images/unifind.jpg',
       badge: 'UniFinder',
-      accent: Color(0xFFFF7643),
+      accent: AppColors.brand,
     ),
     _Slide(
       title: 'Jelajahi Kampus',
@@ -80,18 +75,14 @@ class _LandingScreenState extends State<LandingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.background(context),
       body: SafeArea(
         child: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                _deepNavy,
-                _midnight,
-                _royalPurple,
-              ],
+              colors: AppColors.gradient(context),
             ),
           ),
           child: Stack(
@@ -102,7 +93,7 @@ class _LandingScreenState extends State<LandingScreen> {
                 child: _GlowCircle(
                   diameter: 320,
                   colors: [
-                    _brandColor.withValues(alpha: 0.16),
+                    AppColors.brand.withValues(alpha: 0.16),
                     Colors.transparent,
                   ],
                 ),
@@ -137,32 +128,6 @@ class _LandingScreenState extends State<LandingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                    const SizedBox(height: 6),
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: const LinearGradient(
-                          colors: [
-                            _brandColor,
-                            Color(0xFFFF9E58),
-                          ],
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: _brandColor.withValues(alpha: 0.5),
-                            blurRadius: 18,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.apartment_rounded,
-                        color: Colors.white,
-                        size: 22,
-                      ),
-                    ),
-                    const SizedBox(height: 18),
                     const _HighlightBadges(),
                     const SizedBox(height: 20),
                     Expanded(
@@ -271,16 +236,6 @@ class _LandingScreenState extends State<LandingScreen> {
                       label: 'Daftar Sekarang',
                       onTap: widget.onSignUp,
                     ),
-                    const SizedBox(height: 6),
-                    Center(
-                      child: TextButton(
-                        onPressed: widget.onStart,
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white.withValues(alpha: 0.72),
-                        ),
-                        child: const Text('Lihat katalog tanpa login'),
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -319,20 +274,20 @@ class _GlassPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.07),
+        color: AppColors.surfaceElevated(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+        border: Border.all(color: AppColors.border(context)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: Colors.white.withValues(alpha: 0.9), size: 18),
+          Icon(icon, color: AppColors.brand, size: 18),
           const SizedBox(width: 8),
           Text(
             text,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.9),
-              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary(context),
+              fontWeight: FontWeight.w600,
               fontSize: 12.5,
               letterSpacing: 0.2,
             ),
@@ -350,34 +305,28 @@ class _GlassBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceElevated(context),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border(context)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.bolt_rounded,
+              color: slide.accent, size: 16),
+          const SizedBox(width: 6),
+          Text(
+            'Highlight',
+            style: TextStyle(
+              color: AppColors.textPrimary(context),
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.bolt_rounded,
-                  color: slide.accent.withValues(alpha: 0.9), size: 16),
-              const SizedBox(width: 6),
-              Text(
-                'Highlight',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.95),
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ),
+        ],
       ),
     );
   }
@@ -417,49 +366,30 @@ class _GradientButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            _brandColor,
-            Color(0xFFFF9E58),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: _brandColor.withValues(alpha: 0.5),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(18),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.lock_open_rounded, color: Colors.white),
-                const SizedBox(width: 10),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                  ),
+    return Material(
+      color: AppColors.brand,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
                 ),
-                if (icon != null) ...[
-                  const SizedBox(width: 10),
-                  Icon(icon, color: Colors.white),
-                ],
+              ),
+              if (icon != null) ...[
+                const SizedBox(width: 8),
+                Icon(icon, color: Colors.white, size: 20),
               ],
-            ),
+            ],
           ),
         ),
       ),
@@ -475,33 +405,30 @@ class _OutlinedGlassButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Material(
-          color: Colors.white.withValues(alpha: 0.06),
-          child: InkWell(
-            onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.person_add_alt_1_rounded,
-                      color: Colors.white.withValues(alpha: 0.9)),
-                  const SizedBox(width: 10),
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ],
+    return Material(
+      color: AppColors.surface(context),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.border(context)),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  color: AppColors.textPrimary(context),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
@@ -538,14 +465,14 @@ class _SlideCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.12),
+          color: AppColors.border(context),
           width: 1.1,
         ),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x33000000),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 24,
-            offset: Offset(0, 12),
+            offset: const Offset(0, 12),
           ),
         ],
       ),
@@ -558,11 +485,11 @@ class _SlideCard extends StatelessWidget {
                 slide.asset,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) => Container(
-                  color: const Color(0xFF111423),
+                  color: AppColors.surface(context),
                   alignment: Alignment.center,
-                  child: const Icon(
+                  child: Icon(
                     Icons.school_outlined,
-                    color: Color(0xFF7A85A0),
+                    color: AppColors.textMuted(context),
                     size: 48,
                   ),
                 ),
@@ -670,10 +597,9 @@ class _NavButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white.withValues(alpha: 0.1),
+      color: AppColors.surface(context),
       shape: const CircleBorder(),
       elevation: 0,
-      shadowColor: Colors.black.withValues(alpha: 0.4),
       child: InkWell(
         onTap: onTap,
         customBorder: const CircleBorder(),
@@ -681,7 +607,8 @@ class _NavButton extends StatelessWidget {
           padding: const EdgeInsets.all(10),
           child: Icon(
             icon,
-            color: Colors.white,
+            color: AppColors.brand,
+            size: 20,
           ),
         ),
       ),

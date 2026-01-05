@@ -8,16 +8,30 @@ import '../auth/auth_scope.dart';
 import '../components/bottom_nav.dart';
 import '../components/university_tile.dart';
 import '../data/data_universitas.dart';
+import '../theme/app_colors.dart';
 import 'compare_screen.dart';
 import 'detail_screens.dart';
 import 'profile_screens.dart';
 
-const _brandColor = Color(0xFFFF7643);
-const _bgColors = [
-  Color(0xFF0E0C24),
-  Color(0xFF0F1F37),
-  Color(0xFF1C2448),
-];
+enum _HomeFilterType { all, favorites, recommended }
+
+enum _HomeViewMode { list, grid }
+
+class _HomeFilterData {
+  const _HomeFilterData({
+    required this.type,
+    required this.title,
+    required this.subtitle,
+    required this.imageUrl,
+    required this.badgeText,
+  });
+
+  final _HomeFilterType type;
+  final String title;
+  final String subtitle;
+  final String imageUrl;
+  final String badgeText;
+}
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key, required this.onLogout});
@@ -122,7 +136,7 @@ class _AppShellState extends State<AppShell> {
 
     // Jika user menekan tombol "Buka tab Compare", arahkan ke tab Compare
     if (result == 'navigate_to_compare') {
-      _handleTabSelect(3); // 3 adalah index tab Compare
+      _handleTabSelect(3);
     }
   }
 
@@ -241,11 +255,11 @@ class _AppShellState extends State<AppShell> {
         ),
       ),
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: _bgColors,
+            colors: AppColors.gradient(context),
           ),
         ),
         child: IndexedStack(index: _currentIndex, children: tabs),
@@ -258,7 +272,7 @@ class _AppShellState extends State<AppShell> {
   }
 }
 
-class HomeTab extends StatelessWidget {
+class HomeTab extends StatefulWidget {
   const HomeTab({
     super.key,
     required this.universities,
@@ -271,36 +285,203 @@ class HomeTab extends StatelessWidget {
   final ValueChanged<University> onToggleFavorite;
 
   @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: ListView.separated(
-        padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
-        itemCount: universities.length + 1,
-        separatorBuilder: (_, __) => const SizedBox(height: 16),
-        itemBuilder: (context, index) {
-          if (index == 0) {
-            return const _SectionHeader(
-              title: 'Daftar Universitas',
-              subtitle:
-                  'Lihat ringkasan hunian pilihan sebelum membuka detailnya.',
-            );
-          }
+  State<HomeTab> createState() => _HomeTabState();
+}
 
-          final university = universities[index - 1];
-          final isFavorite = favoriteIds.contains(university.id);
-          return UniversityTile(
-            university: university,
-            isFavorite: isFavorite,
-            onToggleFavorite: () => onToggleFavorite(university),
-            showFavoriteButton: false,
-            showPreviewDetails: false,
-            onTap: () => context.findAncestorStateOfType<_AppShellState>()
-                ?._navigateToUniversityDetail(
-                  university: university,
-                  isFavorite: isFavorite,
+class _HomeTabState extends State<HomeTab> {
+  late final PageController _pageController;
+  int _selectedFilterIndex = 0;
+  _HomeViewMode _viewMode = _HomeViewMode.list;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(viewportFraction: 0.92);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  List<University> _applyFilter(
+    _HomeFilterType type,
+    List<University> universities,
+    Set<int> favoriteIds,
+  ) {
+    switch (type) {
+      case _HomeFilterType.favorites:
+        return universities.where((u) => favoriteIds.contains(u.id)).toList();
+      case _HomeFilterType.recommended:
+        final recommendedIds =
+            universities.take(4).map((u) => u.id).toSet();
+        return universities.where((u) => recommendedIds.contains(u.id)).toList();
+      case _HomeFilterType.all:
+        return universities;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final universities = widget.universities;
+    final isDark = AppColors.isDark(context);
+    final favorites =
+        universities.where((u) => widget.favoriteIds.contains(u.id)).toList();
+    final recommendedList = universities.take(4).toList();
+    final recommendedIds = recommendedList.map((u) => u.id).toSet();
+    final fallbackImage =
+        universities.isNotEmpty ? universities.first.imageUrl : '';
+
+    final filters = [
+      _HomeFilterData(
+        type: _HomeFilterType.all,
+        title: 'Semua Kampus',
+        subtitle: 'Jelajahi daftar kampus pilihan di Sumatera Selatan.',
+        imageUrl: fallbackImage,
+        badgeText: '${universities.length} kampus',
+      ),
+      _HomeFilterData(
+        type: _HomeFilterType.favorites,
+        title: 'Kampus Favorit',
+        subtitle: 'Cepat temukan kampus yang sudah kamu simpan.',
+        imageUrl: favorites.isNotEmpty
+            ? favorites.first.imageUrl
+            : fallbackImage,
+        badgeText: '${favorites.length} favorit',
+      ),
+      _HomeFilterData(
+        type: _HomeFilterType.recommended,
+        title: 'Rekomendasi',
+        subtitle: 'Pilihan kampus unggulan untuk kamu pertimbangkan.',
+        imageUrl: recommendedList.isNotEmpty
+            ? recommendedList.first.imageUrl
+            : fallbackImage,
+        badgeText: '${recommendedIds.length} kampus',
+      ),
+    ];
+
+    final activeFilter = filters[_selectedFilterIndex];
+    final results = _applyFilter(
+      activeFilter.type,
+      universities,
+      widget.favoriteIds,
+    );
+
+    return SafeArea(
+      child: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+              child: _HomeCarousel(
+                controller: _pageController,
+                filters: filters,
+                activeIndex: _selectedFilterIndex,
+                onPageChanged: (index) {
+                  setState(() => _selectedFilterIndex = index);
+                },
+                onIndicatorTap: (index) {
+                  _pageController.animateToPage(
+                    index,
+                    duration: const Duration(milliseconds: 280),
+                    curve: Curves.easeOutCubic,
+                  );
+                  setState(() => _selectedFilterIndex = index);
+                },
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+              child: _HomeHeader(
+                title: 'Daftar Universitas',
+                subtitle:
+                    'Lihat ringkasan hunian pilihan sebelum membuka detailnya.',
+                isGrid: _viewMode == _HomeViewMode.grid,
+                onListTap: () {
+                  setState(() => _viewMode = _HomeViewMode.list);
+                },
+                onGridTap: () {
+                  setState(() => _viewMode = _HomeViewMode.grid);
+                },
+              ),
+            ),
+          ),
+          if (results.isEmpty)
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.only(top: 40),
+                child: _EmptyState(
+                  title: 'Belum ada kampus',
+                  subtitle: 'Coba pilih filter lain untuk melihat daftar.',
                 ),
-          );
-        },
+              ),
+            )
+          else if (_viewMode == _HomeViewMode.list)
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final university = results[index];
+                  final isFavorite =
+                      widget.favoriteIds.contains(university.id);
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      left: 16,
+                      right: 16,
+                      bottom: index == results.length - 1 ? 24 : 16,
+                    ),
+                    child: UniversityTile(
+                      university: university,
+                      isFavorite: isFavorite,
+                      onToggleFavorite: () => widget.onToggleFavorite(university),
+                      showFavoriteButton: false,
+                      showPreviewDetails: false,
+                      useDarkTheme: isDark,
+                      onTap: () => context
+                          .findAncestorStateOfType<_AppShellState>()
+                          ?._navigateToUniversityDetail(
+                            university: university,
+                            isFavorite: isFavorite,
+                          ),
+                    ),
+                  );
+                },
+                childCount: results.length,
+              ),
+            )
+          else
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+              sliver: SliverGrid(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final university = results[index];
+                    final isFavorite =
+                        widget.favoriteIds.contains(university.id);
+                    return _UniversityGridCard(
+                      university: university,
+                      isFavorite: isFavorite,
+                      onTap: () => context
+                          .findAncestorStateOfType<_AppShellState>()
+                          ?._navigateToUniversityDetail(
+                            university: university,
+                            isFavorite: isFavorite,
+                          ),
+                    );
+                  },
+                  childCount: results.length,
+                ),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 14,
+                  crossAxisSpacing: 14,
+                  childAspectRatio: 0.78,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -337,6 +518,12 @@ class SearchTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = AppColors.isDark(context);
+    final textPrimary = AppColors.textPrimary(context);
+    final textMuted = AppColors.textMuted(context);
+    final surface = AppColors.surface(context);
+    final surfaceElevated = AppColors.surfaceElevated(context);
+    final border = AppColors.border(context);
     final lowerQuery = query.toLowerCase();
     final results = universities;
 
@@ -349,15 +536,15 @@ class SearchTab extends StatelessWidget {
             child: TextField(
               controller: controller,
               textInputAction: TextInputAction.search,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: textPrimary),
               decoration: InputDecoration(
                 prefixIcon: Padding(
                   padding: const EdgeInsets.only(left: 16, right: 12),
                   child: SvgPicture.string(
                     _searchIcon,
                     width: 20,
-                    colorFilter: const ColorFilter.mode(
-                      Color(0xFFE0E5F2),
+                    colorFilter: ColorFilter.mode(
+                      textMuted,
                       BlendMode.srcIn,
                     ),
                   ),
@@ -367,17 +554,25 @@ class SearchTab extends StatelessWidget {
                   minHeight: 0,
                 ),
                 hintText: 'Cari Universitas...',
-                hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
+                hintStyle: TextStyle(color: textMuted),
                 filled: true,
-                fillColor: Colors.white.withValues(alpha: 0.08),
+                fillColor: surface,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 14,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: border),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: border),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
                   borderSide:
-                      BorderSide(color: Colors.white.withValues(alpha: 0.12)),
+                      const BorderSide(color: AppColors.brand, width: 1.2),
                 ),
               ),
             ),
@@ -394,34 +589,32 @@ class SearchTab extends StatelessWidget {
                     physics: const BouncingScrollPhysics(),
                     itemCount: specialities.length,
                     separatorBuilder: (_, __) => const SizedBox(width: 8),
-                  itemBuilder: (_, index) {
-                    final item = specialities[index];
-                    final isSelected = item == selectedSpeciality;
-                    return ChoiceChip(
+                    itemBuilder: (_, index) {
+                      final item = specialities[index];
+                      final isSelected = item == selectedSpeciality;
+                      return ChoiceChip(
                       label: Text(item),
                       selected: isSelected,
-                      selectedColor: Colors.white,
-                      backgroundColor: Colors.white.withValues(alpha: 0.92),
-                      checkmarkColor: _brandColor,
+                      selectedColor: AppColors.brand,
+                      backgroundColor: surfaceElevated,
+                      checkmarkColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                         side: BorderSide(
                           color: isSelected
-                              ? _brandColor
-                              : Colors.white.withValues(alpha: 0.35),
+                              ? Colors.transparent
+                              : border,
                         ),
                       ),
                       labelStyle: TextStyle(
-                        color: isSelected
-                            ? _brandColor
-                            : const Color(0xFF374151),
+                        color: isSelected ? Colors.white : textMuted,
                         fontWeight:
                             isSelected ? FontWeight.w700 : FontWeight.w500,
                       ),
-                      onSelected: (_) => onSpecialitySelected(item),
-                    );
-                  },
-                ),
+                        onSelected: (_) => onSpecialitySelected(item),
+                      );
+                    },
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Row(
@@ -430,7 +623,7 @@ class SearchTab extends StatelessWidget {
                       'Urutkan:',
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
-                        color: Colors.white.withValues(alpha: 0.85),
+                        color: textMuted,
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -438,10 +631,12 @@ class SearchTab extends StatelessWidget {
                       value: selectedSort,
                       underline: const SizedBox.shrink(),
                       borderRadius: BorderRadius.circular(12),
-                      dropdownColor: const Color(0xFF121A2F),
-                      style: const TextStyle(color: Colors.white),
-                      icon: const Icon(Icons.keyboard_arrow_down_rounded,
-                          color: Colors.white),
+                      dropdownColor: surface,
+                      style: TextStyle(color: textPrimary),
+                      icon: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: textPrimary,
+                      ),
                       items: sortOptions
                           .map(
                             (option) => DropdownMenuItem<String>(
@@ -465,7 +660,7 @@ class SearchTab extends StatelessWidget {
               child: Text(
                 'Menampilkan ${results.length} hasil',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: textMuted,
                 ),
               ),
             ),
@@ -490,6 +685,7 @@ class SearchTab extends StatelessWidget {
                         onToggleFavorite: () => onToggleFavorite(university),
                         showFavoriteButton: false,
                         showPreviewDetails: false,
+                        useDarkTheme: isDark,
                         onTap: () => context.findAncestorStateOfType<_AppShellState>()
                             ?._navigateToUniversityDetail(
                               university: university,
@@ -517,6 +713,7 @@ class FavoritesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
     if (favorites.isEmpty) {
       return const SafeArea(
         child: _EmptyState(
@@ -545,6 +742,7 @@ class FavoritesTab extends StatelessWidget {
             isFavorite: true,
             onToggleFavorite: () => onToggleFavorite(university),
             showPreviewDetails: false,
+            useDarkTheme: isDark,
             onTap: () => context.findAncestorStateOfType<_AppShellState>()
                 ?._navigateToUniversityDetail(
                   university: university,
@@ -568,6 +766,418 @@ class CompareTab extends StatelessWidget {
   }
 }
 
+class _HomeCarousel extends StatelessWidget {
+  const _HomeCarousel({
+    required this.controller,
+    required this.filters,
+    required this.activeIndex,
+    required this.onPageChanged,
+    required this.onIndicatorTap,
+  });
+
+  final PageController controller;
+  final List<_HomeFilterData> filters;
+  final int activeIndex;
+  final ValueChanged<int> onPageChanged;
+  final ValueChanged<int> onIndicatorTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          height: 180,
+          child: PageView.builder(
+            controller: controller,
+            itemCount: filters.length,
+            onPageChanged: onPageChanged,
+            itemBuilder: (context, index) {
+              final filter = filters[index];
+              return _FilterCard(
+                filter: filter,
+                isActive: index == activeIndex,
+                onTap: () => onIndicatorTap(index),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(
+            filters.length,
+            (index) => GestureDetector(
+              onTap: () => onIndicatorTap(index),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                width: index == activeIndex ? 18 : 8,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: index == activeIndex
+                      ? AppColors.brand
+                      : AppColors.textMuted(context).withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FilterCard extends StatelessWidget {
+  const _FilterCard({
+    required this.filter,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  final _HomeFilterData filter;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedScale(
+      duration: const Duration(milliseconds: 200),
+      scale: isActive ? 1 : 0.96,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: onTap,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isActive
+                    ? Colors.white.withValues(alpha: 0.2)
+                    : AppColors.border(context),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.25),
+                  blurRadius: 18,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  if (filter.imageUrl.isNotEmpty)
+                    Image.asset(
+                      filter.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: AppColors.surfaceElevated(context),
+                        alignment: Alignment.center,
+                        child: Icon(
+                          Icons.school_outlined,
+                          color: AppColors.textMuted(context),
+                          size: 36,
+                        ),
+                      ),
+                    )
+                  else
+                    Container(
+                      color: AppColors.surfaceElevated(context),
+                      alignment: Alignment.center,
+                      child: Icon(
+                        Icons.school_outlined,
+                        color: AppColors.textMuted(context),
+                        size: 36,
+                      ),
+                    ),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withValues(alpha: 0.15),
+                          Colors.black.withValues(alpha: 0.55),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    right: 12,
+                    top: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.brand.withValues(alpha: 0.9),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        filter.badgeText,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 16,
+                    right: 16,
+                    bottom: 16,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          filter.title,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          filter.subtitle,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.85),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeHeader extends StatelessWidget {
+  const _HomeHeader({
+    required this.title,
+    required this.subtitle,
+    required this.isGrid,
+    required this.onListTap,
+    required this.onGridTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final bool isGrid;
+  final VoidCallback onListTap;
+  final VoidCallback onGridTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary(context),
+                    ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                subtitle,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textMuted(context),
+                    ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 12),
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: AppColors.surface(context),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.border(context)),
+          ),
+          child: Row(
+            children: [
+              _ViewToggleButton(
+                icon: Icons.view_agenda_outlined,
+                isSelected: !isGrid,
+                onTap: onListTap,
+              ),
+              _ViewToggleButton(
+                icon: Icons.grid_view_rounded,
+                isSelected: isGrid,
+                onTap: onGridTap,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ViewToggleButton extends StatelessWidget {
+  const _ViewToggleButton({
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(10),
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.brand.withValues(alpha: 0.18)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(
+          icon,
+          size: 18,
+          color:
+              isSelected ? AppColors.brand : AppColors.textMuted(context),
+        ),
+      ),
+    );
+  }
+}
+
+class _UniversityGridCard extends StatelessWidget {
+  const _UniversityGridCard({
+    required this.university,
+    required this.isFavorite,
+    required this.onTap,
+  });
+
+  final University university;
+  final bool isFavorite;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.surfaceElevated(context),
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: AppColors.border(context)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(18),
+                    ),
+                    child: AspectRatio(
+                      aspectRatio: 4 / 3,
+                      child: Image.asset(
+                        university.imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          color: AppColors.surface(context),
+                          alignment: Alignment.center,
+                          child: Icon(
+                            Icons.school_outlined,
+                            color: AppColors.textMuted(context),
+                            size: 32,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (isFavorite)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.45),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.favorite,
+                          size: 14,
+                          color: AppColors.brand,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      university.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: AppColors.textPrimary(context),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        height: 1.3,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      university.location,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: AppColors.textMuted(context),
+                        fontSize: 11,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _GlassTopBar extends StatelessWidget {
   const _GlassTopBar({
     required this.title,
@@ -583,47 +1193,12 @@ class _GlassTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final inner = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                colors: [
-                  _brandColor,
-                  Color(0xFFFF9E58),
-                ],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: _brandColor.withValues(alpha: 0.35),
-                  blurRadius: 14,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: const Icon(Icons.apartment_rounded,
-                color: Colors.white, size: 22),
-          ),
-        ],
-      ),
-    );
-
-    if (!useBlur) return inner;
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(18),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: inner,
+    return Text(
+      title,
+      style: TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimary(context),
       ),
     );
   }
@@ -645,7 +1220,7 @@ class _SectionHeader extends StatelessWidget {
           title,
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
-            color: Colors.white,
+            color: AppColors.textPrimary(context),
           ),
         ),
         if (subtitle != null) ...[
@@ -653,7 +1228,7 @@ class _SectionHeader extends StatelessWidget {
           Text(
             subtitle!,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: Colors.white.withValues(alpha: 0.72),
+              color: AppColors.textMuted(context),
             ),
           ),
         ],
@@ -680,14 +1255,14 @@ class _EmptyState extends StatelessWidget {
             Icon(
               Icons.school_outlined,
               size: 48,
-              color: Colors.white.withValues(alpha: 0.6),
+              color: AppColors.textMuted(context),
             ),
             const SizedBox(height: 16),
             Text(
               title,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
-                color: Colors.white,
+                color: AppColors.textPrimary(context),
               ),
               textAlign: TextAlign.center,
             ),
@@ -695,7 +1270,7 @@ class _EmptyState extends StatelessWidget {
             Text(
               subtitle,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: Colors.white.withValues(alpha: 0.7),
+                color: AppColors.textMuted(context),
               ),
               textAlign: TextAlign.center,
             ),

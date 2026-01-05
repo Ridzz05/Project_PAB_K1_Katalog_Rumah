@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/data_universitas.dart';
+import '../theme/app_colors.dart';
 
 // TODO: MENAMBAHKAN Grid View Dengan Button Toggle Pada UniversityTile Untuk MengGanti View Dari GridView Ke ListView dan Sebaliknya
 class UniversityTile extends StatelessWidget {
@@ -12,6 +13,7 @@ class UniversityTile extends StatelessWidget {
     this.onTap,
     this.showFavoriteButton = true,
     this.showPreviewDetails = true,
+    this.useDarkTheme = false,
   });
 
   final University university;
@@ -20,14 +22,29 @@ class UniversityTile extends StatelessWidget {
   final VoidCallback? onTap;
   final bool showFavoriteButton;
   final bool showPreviewDetails;
+  final bool useDarkTheme;
 
   @override
   Widget build(BuildContext context) {
+    final isDark = useDarkTheme || AppColors.isDark(context);
+    final backgroundColor =
+        isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceElevated;
+    final borderColor = isDark
+        ? Colors.white.withValues(alpha: 0.08)
+        : AppColors.lightBorder;
+    final titleColor =
+        isDark ? AppColors.darkText : AppColors.lightText;
+    final subtitleColor =
+        isDark ? AppColors.darkMuted : AppColors.lightMuted;
+    final mutedIconColor =
+        isDark ? const Color(0xFF93A4C3) : const Color(0xFFB6B6B6);
+    final placeholderColor =
+        isDark ? const Color(0xFF1F2A44) : const Color(0xFFF0F0F0);
     return Material(
-      color: Colors.white,
+      color: backgroundColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: Color(0xFFE9E9E9)),
+        side: BorderSide(color: borderColor),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
@@ -46,11 +63,11 @@ class UniversityTile extends StatelessWidget {
                   errorBuilder: (context, error, stackTrace) => Container(
                     width: 56,
                     height: 56,
-                    color: const Color(0xFFF0F0F0),
+                    color: placeholderColor,
                     alignment: Alignment.center,
-                    child: const Icon(
+                    child: Icon(
                       Icons.school_outlined,
-                      color: Color(0xFFB6B6B6),
+                      color: mutedIconColor,
                     ),
                   ),
                 ),
@@ -62,10 +79,10 @@ class UniversityTile extends StatelessWidget {
                   children: [
                     Text(
                       university.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF1F1F1F),
+                        color: titleColor,
                         height: 1.3,
                       ),
                       maxLines: 2,
@@ -75,9 +92,9 @@ class UniversityTile extends StatelessWidget {
                     if (showPreviewDetails)
                       Text(
                         university.location,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
-                          color: Color(0xFF7A7A7A),
+                          color: subtitleColor,
                           height: 1.4,
                         ),
                         maxLines: 2,
@@ -86,9 +103,9 @@ class UniversityTile extends StatelessWidget {
                     else
                       Text(
                         'lihat detail lengkap',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
-                          color: Color(0xFF7A7A7A),
+                          color: subtitleColor,
                           height: 1.4,
                         ),
                       ),
@@ -99,7 +116,7 @@ class UniversityTile extends StatelessWidget {
                         university.speciality,
                         style: const TextStyle(
                           fontSize: 12,
-                          color: Color(0xFFFF7643),
+                          color: AppColors.brand,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -116,12 +133,12 @@ class UniversityTile extends StatelessWidget {
                       onPressed: onToggleFavorite,
                       iconSize: 22,
                       splashRadius: 20,
-                      icon: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: isFavorite
-                            ? const Color(0xFFFF7643)
-                            : const Color(0xFFB6B6B6),
-                      ),
+                        icon: Icon(
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          color: isFavorite
+                            ? AppColors.brand
+                            : mutedIconColor,
+                        ),
                     ),
                 ],
               ),
@@ -130,7 +147,7 @@ class UniversityTile extends StatelessWidget {
                 onPressed: onTap,
                 iconSize: 22,
                 splashRadius: 20,
-                icon: const Icon(Icons.chevron_right, color: Color(0xFFB6B6B6)),
+                icon: Icon(Icons.chevron_right, color: mutedIconColor),
               ),
             ],
           ),

@@ -27,21 +27,25 @@ class AuthController extends ChangeNotifier {
   }
 
   Future<void> _loadStoredCredentials() async {
-    final prefs = await SharedPreferences.getInstance();
-    final storedEmail = prefs.getString(_emailKey);
-    final storedPassword = prefs.getString(_passwordKey);
-    final storedName = prefs.getString(_nameKey);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final storedEmail = prefs.getString(_emailKey);
+      final storedPassword = prefs.getString(_passwordKey);
+      final storedName = prefs.getString(_nameKey);
 
-    final hasChanges = storedEmail != _userEmail ||
-        storedPassword != _userPassword ||
-        storedName != _userName;
+      final hasChanges = storedEmail != _userEmail ||
+          storedPassword != _userPassword ||
+          storedName != _userName;
 
-    if (!hasChanges) return;
+      if (!hasChanges) return;
 
-    _userEmail = storedEmail;
-    _userPassword = storedPassword;
-    _userName = storedName;
-    notifyListeners();
+      _userEmail = storedEmail;
+      _userPassword = storedPassword;
+      _userName = storedName;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error loading stored credentials: $e');
+    }
   }
 
   Future<void> login(String email, String password) async {
@@ -113,7 +117,8 @@ class AuthController extends ChangeNotifier {
       _userPassword = trimmedPassword;
       _errorMessage = null;
       _isAuthenticated = true;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Error during registration: $e');
       error = 'Gagal menyimpan data. Coba lagi.';
     }
 

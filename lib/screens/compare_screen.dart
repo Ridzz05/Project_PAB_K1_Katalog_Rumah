@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/data_universitas.dart';
+import '../theme/app_colors.dart';
 
 class CompareScreen extends StatefulWidget {
   const CompareScreen({
@@ -138,7 +139,7 @@ class _Selector extends StatelessWidget {
                 u.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(color: AppColors.textPrimary(context)),
               ),
             ),
           )
@@ -146,30 +147,33 @@ class _Selector extends StatelessWidget {
       onChanged: (next) {
         if (next != null) onChanged(next);
       },
-      dropdownColor: const Color(0xFF0F172A),
-      style: const TextStyle(color: Colors.white),
+      dropdownColor: AppColors.surface(context),
+      style: TextStyle(color: AppColors.textPrimary(context)),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(
-          color: Colors.white.withValues(alpha: 0.8),
+          color: AppColors.textMuted(context),
           fontWeight: FontWeight.w600,
         ),
         filled: true,
-        fillColor: const Color(0xFF111A2E),
+        fillColor: AppColors.surfaceElevated(context),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 12,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.18)),
+          borderSide: BorderSide(color: AppColors.border(context)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.32)),
+          borderSide: const BorderSide(color: AppColors.brand),
         ),
       ),
-      icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white),
+      icon: Icon(
+        Icons.keyboard_arrow_down_rounded,
+        color: AppColors.textPrimary(context),
+      ),
     );
   }
 }
@@ -183,7 +187,7 @@ class _HeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Material(
-      color: Colors.white,
+      color: AppColors.surfaceElevated(context),
       elevation: 5,
       shadowColor: const Color(0x22000000),
       borderRadius: BorderRadius.circular(16),
@@ -200,12 +204,12 @@ class _HeroCard extends StatelessWidget {
                   university.imageUrl,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) => Container(
-                    color: const Color(0xFFF0F0F0),
+                    color: AppColors.surface(context),
                     alignment: Alignment.center,
-                    child: const Icon(
+                    child: Icon(
                       Icons.school_outlined,
                       size: 48,
-                      color: Color(0xFFB6B6B6),
+                      color: AppColors.textMuted(context),
                     ),
                   ),
                 ),
@@ -216,25 +220,25 @@ class _HeroCard extends StatelessWidget {
               university.name,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF1F1F1F),
+                color: AppColors.textPrimary(context),
               ),
             ),
             const SizedBox(height: 6),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(
+                Icon(
                   Icons.location_on_outlined,
                   size: 16,
-                  color: Color(0xFF7A7A7A),
+                  color: AppColors.textMuted(context),
                 ),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
                     university.location,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: Color(0xFF7A7A7A),
+                      color: AppColors.textMuted(context),
                       height: 1.4,
                     ),
                   ),
@@ -249,14 +253,14 @@ class _HeroCard extends StatelessWidget {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0x1AFF7643),
+                  color: AppColors.brand.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
                   university.speciality,
                   style: const TextStyle(
                     fontSize: 12,
-                    color: Color(0xFFFF7643),
+                    color: AppColors.brand,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -300,19 +304,19 @@ class _SpecMatrix extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               decoration: BoxDecoration(
-                color: const Color(0xFFF7F7F7),
+                color: AppColors.surface(context),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFE9E9E9)),
+                border: Border.all(color: AppColors.border(context)),
               ),
               child: Row(
                 children: [
-                  const SizedBox(
+                  SizedBox(
                     width: 140,
                     child: Text(
                       'Spesifikasi',
-                      style: TextStyle(
+                      style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF1F1F1F),
+                        color: AppColors.textPrimary(context),
                       ),
                     ),
                   ),
@@ -324,7 +328,7 @@ class _SpecMatrix extends StatelessWidget {
                         uni.name,
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF1F1F1F),
+                          color: AppColors.textPrimary(context),
                         ),
                       ),
                     ),
@@ -334,7 +338,7 @@ class _SpecMatrix extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Material(
-              color: Colors.white,
+              color: AppColors.surfaceElevated(context),
               elevation: 3,
               shadowColor: const Color(0x11000000),
               borderRadius: BorderRadius.circular(12),
@@ -351,7 +355,7 @@ class _SpecMatrix extends StatelessWidget {
                             bottom: BorderSide(
                               color: rows.last == row
                                   ? Colors.transparent
-                                  : const Color(0xFFE9E9E9),
+                                  : AppColors.border(context),
                             ),
                           ),
                         ),
@@ -362,9 +366,9 @@ class _SpecMatrix extends StatelessWidget {
                               width: 140,
                               child: Text(
                                 row.title,
-                                style: const TextStyle(
+                                style: theme.textTheme.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.w700,
-                                  color: Color(0xFF3D3D3D),
+                                  color: AppColors.textPrimary(context),
                                 ),
                               ),
                             ),
@@ -375,7 +379,7 @@ class _SpecMatrix extends StatelessWidget {
                                 child: Text(
                                   row.valueBuilder(uni),
                                   style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: const Color(0xFF4A4A4A),
+                                    color: AppColors.textMuted(context),
                                     height: 1.4,
                                   ),
                                 ),

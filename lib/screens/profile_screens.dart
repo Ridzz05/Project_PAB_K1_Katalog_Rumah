@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:io';
@@ -89,6 +90,15 @@ class _ProfilePicState extends State<ProfilePic> {
   }
 
   Future<void> _pickFromGallery() async {
+    if (kIsWeb) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Fitur pilih gambar hanya tersedia di mobile.'),
+        ),
+      );
+      return;
+    }
     try {
       final XFile? picked = await _picker.pickImage(
         source: ImageSource.gallery,

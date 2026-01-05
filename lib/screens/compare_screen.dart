@@ -127,6 +127,8 @@ class _Selector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<University>(
+      isExpanded: true,
+      isDense: true,
       initialValue: options.firstWhere(
         (u) => u.id == value.id,
         orElse: () => options.first,
@@ -162,7 +164,7 @@ class _Selector extends StatelessWidget {
         fillColor: AppColors.surfaceElevated(context),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
-          vertical: 12,
+          vertical: 10,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -175,6 +177,7 @@ class _Selector extends StatelessWidget {
       ),
       icon: Icon(
         Icons.keyboard_arrow_down_rounded,
+        size: 20,
         color: AppColors.textPrimary(context),
       ),
     );
